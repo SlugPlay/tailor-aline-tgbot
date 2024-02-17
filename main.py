@@ -12,6 +12,7 @@ bot = Bot(token="6984947559:AAHpR2pdf9oEOwJ2ReS7yp4QUb5gNk91rO8")
 # Диспетчер
 dp = Dispatcher()
 
+flag = 0
 
 class UserState(StatesGroup):
     name = State()
@@ -20,11 +21,21 @@ class UserState(StatesGroup):
 @dp.message(StateFilter(None), Command('test'))
 async def user_register(message: types.Message, state: FSMContext):
     await message.answer("Введите своё имя")
-    await state.set_state(UserState.name)
+    if flag == 1:
+        await state.set_state(UserState.name)
+    else:
+        await state.set_state(UserState.addres)
 @dp.message(StateFilter(UserState.name))
 async def user_register(message: types.Message, state: FSMContext):
-    await state.update_data(username=message.text)
+    #await state.update_data(username=message.text)
     await message.answer("Введите свою фамилию")
+    await state.set_state(UserState.addres)
+
+@dp.message(StateFilter(UserState.addres))
+async def user_reg(message: types.Message, state: FSMContext):
+    await message.reply('Иди нахуй')
+    await state.clear()
+
 
 
 
