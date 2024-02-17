@@ -1,33 +1,33 @@
 import asyncio
 import logging
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters.command import Command
+from aiogram import Bot, Dispatcher, types, fsm
+from aiogram.filters import Command, StateFilter
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.context import FSMContext
 
-# Включаем логирование, чтобы не пропустить важные сообщения
-logging.basicConfig(level=logging.INFO)
-# Объект бота
 bot = Bot(token="6984947559:AAHpR2pdf9oEOwJ2ReS7yp4QUb5gNk91rO8")
 # Диспетчер
 dp = Dispatcher()
 
-# Хэндлер на команду /start
-@dp.message()
-async def cmd_start(message: types.Message):
-    await message.answer("Введите свой номер")
 
-@dp.message()
-async def cmd_start1(message: types.Message):
-    await message.answer("Введите свое имя")
+class UserState(StatesGroup):
+    name = State()
+    addres = State()
 
-@dp.message()
-async def cmd_start2(message: types.Message):
+@dp.message(Command('test'))
+async def user_register(message: types.Message):
+    await message.answer("Введите своё имя")
+    await UserState.name.set_state
+
+@dp.message(StateFilter(UserState.name))
+async def user_register(message: types.Message, state: FSMContext):
+    await state.update_data(username=message.text)
     await message.answer("Введите свою фамилию")
 
 
-# Запуск процесса поллинга новых апдейтов
+
 async def main():
     await dp.start_polling(bot)
-    dp.message.register(cmd_start2)
 
 
 if __name__ == "__main__":
