@@ -1,9 +1,12 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, types, fsm
+from aiogram.fsm import state
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
+
+
 
 bot = Bot(token="6984947559:AAHpR2pdf9oEOwJ2ReS7yp4QUb5gNk91rO8")
 # Диспетчер
@@ -15,10 +18,9 @@ class UserState(StatesGroup):
     addres = State()
 
 @dp.message(StateFilter(None), Command('test'))
-async def user_register(message: types.Message):
+async def user_register(message: types.Message, state: FSMContext):
     await message.answer("Введите своё имя")
-
-
+    await state.set_state(UserState.name)
 @dp.message(StateFilter(UserState.name))
 async def user_register(message: types.Message, state: FSMContext):
     await state.update_data(username=message.text)
