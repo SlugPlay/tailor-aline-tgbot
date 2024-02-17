@@ -14,10 +14,10 @@ class UserState(StatesGroup):
     name = State()
     addres = State()
 
-@dp.message(Command('test'))
+@dp.message(StateFilter(None), Command('test'))
 async def user_register(message: types.Message):
     await message.answer("Введите своё имя")
-    await UserState.name.set_state
+    await
 
 @dp.message(StateFilter(UserState.name))
 async def user_register(message: types.Message, state: FSMContext):
