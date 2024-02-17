@@ -36,8 +36,9 @@ async def central(flag, state: FSMContext):
 
 
 @dp.message(StateFilter(None))
-async def test(message: types.Message, state: FSMContext):
+async def test(message: types.Message):
     await message.answer("Введите qweq")
+
 
 @dp.message(StateFilter(None))
 async def user_register(message: types.Message, state: FSMContext):
