@@ -1,12 +1,19 @@
 import asyncio
 import logging
+import json
+
 from aiogram import Bot, Dispatcher, types, fsm
 from aiogram.fsm import state
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
-bot = Bot(token="6984947559:AAHpR2pdf9oEOwJ2ReS7yp4QUb5gNk91rO8")
+
+#Зависимости----------------------------------------------------------------------------------------------------------
+file = open('bot_token.json', 'r')
+data = json.load(file).get('token')
+bot = Bot(token=str(data))
+
 # Диспетчер
 dp = Dispatcher()
 
