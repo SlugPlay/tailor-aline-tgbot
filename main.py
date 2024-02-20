@@ -8,6 +8,7 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
+files = open('dataset.txt', 'w')
 # Зависимости----------------------------------------------------------------------------------------------------------
 file = open('bot_token.json', 'r')
 data = json.load(file).get('token')
@@ -24,12 +25,13 @@ class UserState(StatesGroup):
     ageUser = State()
     admin = State()
 
-
+mes = [0]
 class UserReg(StatesGroup):
     name = State()
     lastName = State()
     age = State()
     region = State()
+    regionAnother = State()
     clothingSize = State()
 
 
@@ -44,8 +46,7 @@ async def user_start(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserState.centr))
 async def user_start(message: types.Message, state: FSMContext):
-    flag1 = str(message.text)
-    # db_func(flag1)
+    print(str(message.text), 'phone')
     if flag1 == 'newUser':
         await message.answer('Введите свое имя')
         await state.set_state(UserState.newUser)
@@ -55,41 +56,58 @@ async def user_start(message: types.Message, state: FSMContext):
         await state.set_state(UserState.admin)
 
 
-# async def central(flag, message):
-#     if flag == 'newUser':
-#         await reg()
-#     elif flag == 'ageUser':
-#         asyncio.run()
-#     elif flag == 'admin':
-#         asyncio.run()
-
-
 @dp.message(StateFilter(UserState.newUser))
 async def reg(message: types.Message, state: FSMContext):
+    print(str(message.text), 'firstname')
     await message.answer('Введите свою фамилию')
     await state.set_state(UserReg.lastName)
+
     recInformation = ''
 
 
 @dp.message(StateFilter(UserReg.lastName))
 async def reg(message: types.Message, state: FSMContext):
+    print(str(message.text), "lastname")
     await message.answer('Введите свой возраст')
     await state.set_state(UserReg.age)
+
     recInformation = ''
 
 
 @dp.message(StateFilter(UserReg.age))
+async def regRegio(message: types.Message, state: FSMContext):
+    recInformation = message.text
+    print(str(recInformation), 'age')
+    kb = [
+        [types.KeyboardButton(text="Санкт-Петербург"), types.KeyboardButton(text="Москва")],
+        [types.KeyboardButton(text="Другой")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+    await message.answer("Выберите свой регион из доступных", reply_markup=keyboard)
+    await state.set_state(UserReg.regionAnother)
+
+
+@dp.message(StateFilter(UserReg.regionAnother))
 async def reg(message: types.Message, state: FSMContext):
-    await message.answer('Выберите свой регион')
-    await state.set_state(UserReg.region)
+    if str(message.text).lower() == 'другой':
+        await message.answer('Введите свой регион')
+        await state.set_state(UserReg.regionAnother)
+    else:
+        print(str(message.text), 'region')
+        kb = [
+            [types.KeyboardButton(text="XXS"), types.KeyboardButton(text="XS"),
+             types.KeyboardButton(text="S"), types.KeyboardButton(text="M")],
+            [types.KeyboardButton(text="L"), types.KeyboardButton(text="XL"),
+             types.KeyboardButton(text="XXL"), types.KeyboardButton(text="XXXL")]
+
+        ]
+        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        await message.answer("Выберите свой размер", reply_markup=keyboard)
+        await state.set_state(UserReg.regionAnother)
+        print(str(message.text), 'size')
+
     recInformation = ''
 
-
-# @dp.message(Command('photo'))
-# async def echo_photo_message(message: types.Message, state: FSMContext, bot: Bot):
-#     await message.answer('пришлите фото')
-#     file = await bot.get_file(message.document.file_id)
-#     await message.photo(file)
 
 
 @dp.message()
@@ -99,3 +117,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+files.close()
