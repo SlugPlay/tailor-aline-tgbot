@@ -9,6 +9,7 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
+files = open('dataset.txt', 'w')
 # Зависимости----------------------------------------------------------------------------------------------------------
 file = open('bot_token.json', 'r')
 data = json.load(file).get('token')
@@ -27,12 +28,13 @@ class UserState(StatesGroup):
     newUser = State()
     admin = State()
 
-
+mes = [0]
 class UserReg(StatesGroup):
     name = State()
     lastName = State()
     age = State()
     region = State()
+    regionAnother = State()
     clothingSize = State()
 
 class CoolerUser(StatesGroup):
@@ -48,6 +50,7 @@ async def user_start(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserState.centr))
 async def user_start(message: types.Message, state: FSMContext):
+<<<<<<< main.py
     phone = str(message.text)
     data_users = await db.get_phone_status()
     flag1 = 'newUser'
@@ -55,6 +58,7 @@ async def user_start(message: types.Message, state: FSMContext):
         if phone == str(data_users[i][0]):
             flag1 = str(data_users[i][1])
             print(flag1)
+    print(str(message.text), 'phone')
     if flag1 == 'newUser':
         await message.answer('Введите свое имя')
         await state.set_state(UserState.newUser)
@@ -66,22 +70,13 @@ async def user_start(message: types.Message, state: FSMContext):
         await state.set_state(UserState.admin)
 
 
-# async def central(flag, message):
-#     if flag == 'newUser':
-#         await reg()
-#     elif flag == 'ageUser':
-#         asyncio.run()
-#     elif flag == 'admin':
-#         asyncio.run()
-
-
 @dp.message(StateFilter(UserState.newUser))
 async def reg(message: types.Message, state: FSMContext):
     recInformation = str(message.text)
     user_info.append(recInformation)
     await message.answer('Введите свою фамилию')
     await state.set_state(UserReg.lastName)
-    
+    print(str(message.text), 'firstname')
 
 
 @dp.message(StateFilter(UserReg.lastName))
@@ -90,14 +85,44 @@ async def reg(message: types.Message, state: FSMContext):
     user_info.append(recInformation)
     await message.answer('Введите свой возраст')
     await state.set_state(UserReg.age)
+    print(str(message.text), "lastname")
 
 
 @dp.message(StateFilter(UserReg.age))
+async def regRegio(message: types.Message, state: FSMContext):
+    recInformation = message.text
+    print(str(recInformation), 'age')
+    kb = [
+        [types.KeyboardButton(text="Санкт-Петербург"), types.KeyboardButton(text="Москва")],
+        [types.KeyboardButton(text="Другой")]
+    ]
+    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+    await message.answer("Выберите свой регион из доступных", reply_markup=keyboard)
+    await state.set_state(UserReg.regionAnother)
+
+
+@dp.message(StateFilter(UserReg.regionAnother))
 async def reg(message: types.Message, state: FSMContext):
     recInformation = str(message.text)
     user_info.append(recInformation)
-    await message.answer('Выберите свой регион')
-    await state.set_state(UserReg.region)
+    if str(message.text).lower() == 'другой':
+        await message.answer('Введите свой регион')
+        await state.set_state(UserReg.regionAnother)
+    else:
+        print(str(message.text), 'region')
+        kb = [
+            [types.KeyboardButton(text="XXS"), types.KeyboardButton(text="XS"),
+             types.KeyboardButton(text="S"), types.KeyboardButton(text="M")],
+            [types.KeyboardButton(text="L"), types.KeyboardButton(text="XL"),
+             types.KeyboardButton(text="XXL"), types.KeyboardButton(text="XXXL")]
+
+        ]
+        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        await message.answer("Выберите свой размер", reply_markup=keyboard)
+        await state.set_state(UserReg.regionAnother)
+        print(str(message.text), 'size')
+
+    recInformation = ''
 
 
 # @dp.message(Command('photo'))
@@ -125,3 +150,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+files.close()
