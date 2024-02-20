@@ -25,6 +25,7 @@ recInformation = ''
 class UserState(StatesGroup):
     centr = State()
     newUser = State()
+    ageUser = State()
     admin = State()
 
 mes = [0]
@@ -39,9 +40,6 @@ class UserReg(StatesGroup):
     photoBack = State()
     photoProfile = State()
 
-class CoolerUser(StatesGroup):
-    ageUser = State()
-
 
 @dp.message(Command('start'))
 async def user_start(message: types.Message, state: FSMContext):
@@ -54,6 +52,7 @@ async def user_start(message: types.Message, state: FSMContext):
 async def user_start(message: types.Message, state: FSMContext):
     global user_info
 
+    user_info = []
     phone = str(message.text)
     data_users = await db.get_phone_status()
     flag1 = 'newUser'
@@ -62,7 +61,6 @@ async def user_start(message: types.Message, state: FSMContext):
             flag1 = str(data_users[i][1])
             print(flag1)
     if flag1 == 'newUser':
-        user_info = []
         user_info.append(int(message.chat.id))
         user_info.append(phone)
         await db.create_profile(user_info[0], user_info[1], 'newUser')
@@ -72,10 +70,8 @@ async def user_start(message: types.Message, state: FSMContext):
         await message.answer('Введите свое имя')
         await state.set_state(UserState.newUser)
     elif flag1 == 'ageUser':
-        print(1)
-        await state.set_state(UserState.newUser)
+        await state.set_state(UserState.ageUser)
     elif flag1 == 'admin':
-        print(3)
         await state.set_state(UserState.admin)
 
 
@@ -172,15 +168,13 @@ async def reg(message: types.Message, state: FSMContext):
 #     file = await bot.get_file(message.document.file_id)
 #     await message.photo(file)
 
-@dp.message(StateFilter(CoolerUser.ageUser))
+@dp.message(StateFilter(UserState.ageUser))
 async def menu(message: types.Message, state: FSMContext):
-    print(2)
     await message.answer('Олух')
 
 
 @dp.message(StateFilter(UserState.admin))
 async def menu(message: types.Message, state: FSMContext):
-    print(4)
     await message.answer('Тварь')
 
 
