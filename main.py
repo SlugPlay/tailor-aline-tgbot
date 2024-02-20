@@ -50,7 +50,6 @@ async def user_start(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserState.centr))
 async def user_start(message: types.Message, state: FSMContext):
-<<<<<<< main.py
     phone = str(message.text)
     data_users = await db.get_phone_status()
     flag1 = 'newUser'
