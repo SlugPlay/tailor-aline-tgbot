@@ -14,7 +14,6 @@ files = open('dataset.txt', 'w')
 file = open('bot_token.json', 'r')
 data = json.load(file).get('token')
 bot = Bot(token=str(data))
-user_info = []
 flag1 = ''
 
 
@@ -36,6 +35,9 @@ class UserReg(StatesGroup):
     region = State()
     regionAnother = State()
     clothingSize = State()
+    photoFront = State()
+    photoBack = State()
+    photoProfile = State()
 
 class CoolerUser(StatesGroup):
     ageUser = State()
@@ -50,6 +52,8 @@ async def user_start(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserState.centr))
 async def user_start(message: types.Message, state: FSMContext):
+    global user_info
+
     phone = str(message.text)
     data_users = await db.get_phone_status()
     flag1 = 'newUser'
@@ -57,8 +61,14 @@ async def user_start(message: types.Message, state: FSMContext):
         if phone == str(data_users[i][0]):
             flag1 = str(data_users[i][1])
             print(flag1)
-    print(str(message.text), 'phone')
     if flag1 == 'newUser':
+        user_info = []
+        user_info.append(int(message.chat.id))
+        user_info.append(phone)
+        await db.create_profile(user_info[0], user_info[1], 'newUser')
+        user_info.append('ageUser')
+        print(str(message.chat.id), 'user id')
+        print(str(message.text), 'phone')
         await message.answer('Введите свое имя')
         await state.set_state(UserState.newUser)
     elif flag1 == 'ageUser':
@@ -71,26 +81,25 @@ async def user_start(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserState.newUser))
 async def reg(message: types.Message, state: FSMContext):
-    recInformation = str(message.text)
-    user_info.append(recInformation)
+    user_info.append(str(message.text))
+    print(str(message.text), 'firstname')
     await message.answer('Введите свою фамилию')
     await state.set_state(UserReg.lastName)
-    print(str(message.text), 'firstname')
+    
 
 
 @dp.message(StateFilter(UserReg.lastName))
 async def reg(message: types.Message, state: FSMContext):
-    recInformation = str(message.text)
-    user_info.append(recInformation)
+    user_info.append(str(message.text))
+    print(str(message.text), 'lastname')
     await message.answer('Введите свой возраст')
     await state.set_state(UserReg.age)
-    print(str(message.text), "lastname")
 
 
 @dp.message(StateFilter(UserReg.age))
 async def regRegio(message: types.Message, state: FSMContext):
-    recInformation = message.text
-    print(str(recInformation), 'age')
+    user_info.append(str(message.text))
+    print(str(message.text), 'age')
     kb = [
         [types.KeyboardButton(text="Санкт-Петербург"), types.KeyboardButton(text="Москва")],
         [types.KeyboardButton(text="Другой")]
@@ -102,12 +111,11 @@ async def regRegio(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserReg.regionAnother))
 async def reg(message: types.Message, state: FSMContext):
-    recInformation = str(message.text)
-    user_info.append(recInformation)
     if str(message.text).lower() == 'другой':
         await message.answer('Введите свой регион')
         await state.set_state(UserReg.regionAnother)
     else:
+        user_info.append(str(message.text))
         print(str(message.text), 'region')
         kb = [
             [types.KeyboardButton(text="XXS"), types.KeyboardButton(text="XS"),
@@ -118,10 +126,44 @@ async def reg(message: types.Message, state: FSMContext):
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await message.answer("Выберите свой размер", reply_markup=keyboard)
-        await state.set_state(UserReg.regionAnother)
-        print(str(message.text), 'size')
+        await state.set_state(UserReg.clothingSize)
 
-    recInformation = ''
+
+@dp.message(StateFilter(UserReg.clothingSize))
+async def reg(message: types.Message, state: FSMContext):
+    user_info.append(str(message.text))
+    print(str(message.text), 'size')
+    await message.answer('Загрузите фото в полный рост спереди')
+    await state.set_state(UserReg.photoFront)
+
+
+@dp.message(StateFilter(UserReg.photoFront))
+async def reg(message: types.Message, state: FSMContext):
+    file_id = message.photo[-1].file_id
+    user_info.append(file_id)
+    print(str(file_id), 'photoFront')
+    await message.answer('Загрузите фото в полный рост сзади')
+    await state.set_state(UserReg.photoBack)
+
+
+@dp.message(StateFilter(UserReg.photoBack))
+async def reg(message: types.Message, state: FSMContext):
+    file_id = message.photo[-1].file_id
+    user_info.append(file_id)
+    print(str(file_id), 'photoBack')
+    await message.answer('Загрузите фото в полный рост в профиль')
+    await state.set_state(UserReg.photoProfile)
+
+
+@dp.message(StateFilter(UserReg.photoProfile))
+async def reg(message: types.Message, state: FSMContext):
+    file_id = message.photo[-1].file_id
+    user_info.append(file_id)
+    print(str(file_id), 'photoProfile')
+    user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile = user_info
+    await db.edit_profile(user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile)
+    await message.answer('OK')
+    await state.set_state(UserReg.photoBack)
 
 
 # @dp.message(Command('photo'))

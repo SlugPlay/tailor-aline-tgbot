@@ -26,8 +26,8 @@ async def create_profile(user_id, phone_number, status):
         conn.commit()
 
 
-async def edit_profile(user_id, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile):
-    cur.execute("UPDATE users SET status = '{}', first_name = '{}' last_name = '{}', age = '{}' region = '{}', size = '{}' photo_front = '{}', photo_back = '{}' photo_profile = '{}' WHERE user_id == '{}'".format(status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile, user_id))
+async def edit_profile(user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile):
+    cur.execute("UPDATE users SET status = '{}', first_name = '{}', last_name = '{}', age = '{}', region = '{}', size = '{}', photo_front = '{}', photo_back = '{}', photo_profile = '{}' WHERE user_id == '{}'".format(status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile, user_id))
     conn.commit()
 
 
