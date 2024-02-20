@@ -1,19 +1,30 @@
-
 import asyncio
 import logging
 import json
-import db
+import re
+
 from aiogram import Bot, Dispatcher, types, fsm
 from aiogram.fsm import state
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
-
-
+#Зависимости----------------------------------------------------------------------------------------------------------
 file = open('bot_token.json', 'r')
 data = json.load(file).get('token')
 bot = Bot(token=str(data))
+user_info = []
+
+def check(text, type):
+    if type == 'lang':
+        regex = "^[a-zA-Zа-яА-ЯёЁ]+$"
+        pattern = re.compile(regex)
+        return pattern.search(text) is not None
+    if type == 'num':
+        return text.isdigit()
+
+
+
 # Диспетчер
 dp = Dispatcher()
 
@@ -34,38 +45,36 @@ class UserReg(StatesGroup):
 
 flag = 'newUser'
 
+
 @dp.message(Command('start'))
 async def user_start(message: types.Message, state: FSMContext):
-    await message.answer('Здравствуйте, введите свой номер телефона')
-    await db.create_db()
+    await message.answer('Здравствуйте, введите свою номер')
+    if flag == 'newUser':
+        await state.set_state(UserState.newUser)
+    elif flag == 'ageUser':
+        await state.set_state(UserState.ageUser)
+    elif flag == 'admin':
+        await state.set_state(UserState.admin)
+
+
+# async def central(flag, message):
+#     if flag == 'newUser':
+#         await reg()
+#     elif flag == 'ageUser':
+#         asyncio.run()
+#     elif flag == 'admin':
+#         asyncio.run()
+
+
+@dp.message(StateFilter(UserState.newUser))
+async def reg(message: types.Message, state: FSMContext):
+    await state.set_state(UserReg.name)
+
 
 @dp.message()
-async def user_start2(message: types.Message):
-    text = str(message.text)
-
-    idi = message.chat.id
-    await central(text, idi)
-
-async def central(type, idi):
-    if type == 'newUser':
-        await registration(idi)
-
-async def registration(idi):
-    async def start_reg():
-        await bot.send_message(chat_id=idi, text='Введите ваш возраст')
-        dp.message_reaction
-        await bot.send_message(chat_id=idi, text='123 ваш возраст')
-    
-    @dp.message()
-    async def second_reg(message: types.Message):
-        text = str(message.text)
-        await message.answer(text=text)
-    
-    await start_reg()
-
 async def main():
     await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())
