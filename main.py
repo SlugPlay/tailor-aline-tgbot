@@ -142,7 +142,7 @@ async def user_start(message: types.Message, state: FSMContext):
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer('Привет имя пользователя', reply_markup=keyboard)
+        await message.answer('Привет **имя пользователя**', reply_markup=keyboard) # заменить на нормальное
     elif flag1 == 'admin':
         await state.set_state(UserState.admin)
 
@@ -181,10 +181,14 @@ async def reg(message: types.Message, state: FSMContext):
     else:
         user_info.append(str(message.text))
         kb = [
-            [types.KeyboardButton(text="XXS"), types.KeyboardButton(text="XS"),
-             types.KeyboardButton(text="S"), types.KeyboardButton(text="M")],
-            [types.KeyboardButton(text="L"), types.KeyboardButton(text="XL"),
-             types.KeyboardButton(text="XXL"), types.KeyboardButton(text="XXXL")]
+            [types.KeyboardButton(text="40"), types.KeyboardButton(text="41"),
+             types.KeyboardButton(text="42"), types.KeyboardButton(text="43")],
+            [types.KeyboardButton(text="44"), types.KeyboardButton(text="45"),
+             types.KeyboardButton(text="46"), types.KeyboardButton(text="47")],
+            [types.KeyboardButton(text="48"), types.KeyboardButton(text="49"),
+             types.KeyboardButton(text="50"), types.KeyboardButton(text="51")],
+            [types.KeyboardButton(text="52"), types.KeyboardButton(text="53"),
+             types.KeyboardButton(text="54"), types.KeyboardButton(text="55"), types.KeyboardButton(text="55")]
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
