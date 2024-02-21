@@ -17,9 +17,9 @@ def check(text, type):
 
 
 #Проверка на фотку---------------------------------------------------------------------------------------------------------------
-if message.photo:
-    pass # Ваш код в случае если пользователь отправил фото
-elif message.document:
-    pass
-else:
-    await message.answer("Это не фото")
+# if message.photo:
+#     pass # Ваш код в случае если пользователь отправил фото
+# elif message.document:
+#     pass
+# else:
+#     await message.answer("Это не фото")
