@@ -31,6 +31,7 @@ photo_16 = FSInputFile("photo_bot/Обхват талии.jpg")
 photo_17 = FSInputFile("photo_bot/Обхват шеи.jpg")
 photo_18 = FSInputFile("photo_bot/Центр груди.jpg")
 photo_19 = FSInputFile("photo_bot/Ширина плеча_.jpg")
+photo_20 = FSInputFile("photo_bot/Длина рукава.jpg")
 # --------------------------------------------- photo-------------------------------------------
 flag1 = ''
 
@@ -572,10 +573,10 @@ async def under(message: types.Message, state: FSMContext):
     await state.set_state(UserSize.step13)
 
 
-# нет фото!!!!! длина рукова
+
 @dp.message(StateFilter(UserSize.step13))
 async def under(message: types.Message, state: FSMContext):
-    await message.answer_photo(photo_14, 'Длина рукава')
+    await message.answer_photo(photo_20, 'Длина рукава')
     await state.set_state(UserSize.step14)
 
 
