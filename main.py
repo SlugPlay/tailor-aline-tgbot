@@ -119,7 +119,7 @@ async def user_start(message: types.Message, state: FSMContext):
 
         ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
-    nomer = await message.answer('Здравствуйте, предоставьте свой номер телефона', reply_markup=keyboard)
+    nomer = await message.answer('Просим предоставить номер телефона', reply_markup=keyboard)
     await state.set_state(UserState.centr)
 
 
@@ -139,7 +139,7 @@ async def user_start(message: types.Message, state: FSMContext):
         user_info.append(global_phone_number)
         await db.create_profile(user_info[0], user_info[1], 'newUser')
         user_info.append('ageUser')
-        await message.answer('Введите свое имя')
+        await message.answer('Напишите ваше имя')
         await state.set_state(UserState.newUser)
     elif flag1 == 'ageUser':
         await state.set_state(UserState.ageUser)
@@ -149,7 +149,7 @@ async def user_start(message: types.Message, state: FSMContext):
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         all_user_data = db.get_user(global_phone_number)
-        await message.answer('Приветствую, {first_name}'.format(first_name=all_user_data[2]), reply_markup=keyboard)
+        await message.answer('Добрый день, {first_name}'.format(first_name=all_user_data[2]), reply_markup=keyboard)
     elif flag1 == 'admin':
         await state.set_state(UserState.admin)
 
@@ -157,14 +157,14 @@ async def user_start(message: types.Message, state: FSMContext):
 @dp.message(StateFilter(UserState.newUser))
 async def reg(message: types.Message, state: FSMContext):
     user_info.append(str(message.text))
-    await message.answer('Введите свою фамилию')
+    await message.answer('Напишите вашу фамилию')
     await state.set_state(UserReg.lastName)
 
 
 @dp.message(StateFilter(UserReg.lastName))
 async def reg(message: types.Message, state: FSMContext):
     user_info.append(str(message.text))
-    await message.answer('Введите свой возраст')
+    await message.answer('Напишите свой возраст')
     await state.set_state(UserReg.age)
 
 
@@ -176,14 +176,14 @@ async def regRegio(message: types.Message, state: FSMContext):
         [types.KeyboardButton(text="Другой")]
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    await message.answer("Выберите свой регион из доступных", reply_markup=keyboard)
+    await message.answer("Выберите свой регион", reply_markup=keyboard)
     await state.set_state(UserReg.regionAnother)
 
 
 @dp.message(StateFilter(UserReg.regionAnother))
 async def reg(message: types.Message, state: FSMContext):
     if str(message.text).lower() == 'другой':
-        await message.answer('Введите свой регион', reply_markup=types.ReplyKeyboardRemove())
+        await message.answer('Выберите свой регион', reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserReg.regionAnother)
     else:
         user_info.append(str(message.text))
@@ -199,7 +199,7 @@ async def reg(message: types.Message, state: FSMContext):
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer("Выберите свой размер", reply_markup=keyboard)
+        await message.answer("Какой размер одежды вы носите?", reply_markup=keyboard)
         await state.set_state(UserReg.clothingSize)
 
 
@@ -242,7 +242,7 @@ async def reg(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     all_user_data = db.get_user(phone)
     await message.answer('Регистрация завершена')
-    await message.answer('Приветствую, {first_name1}'.format(first_name1=all_user_data[2]), reply_markup=keyboard)
+    await message.answer('Добрый день, {first_name1}'.format(first_name1=all_user_data[2]), reply_markup=keyboard)
     await state.set_state(UserState.ageUser)
 
 
@@ -259,7 +259,7 @@ async def menu(message: types.Message, state: FSMContext):
 
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    await message.answer("Что вы хотите заказать", reply_markup=keyboard)
+    await message.answer("Что вы хотите заказать?", reply_markup=keyboard)
     await state.set_state(UserMenu.menu)
 
 
