@@ -54,6 +54,7 @@ class UserSize(StatesGroup):
     step1 = State()
     step2 = State()
     step3 = State()
+    step3_5 = State()
     step4 = State()
     step5 = State()
     step6 = State()
@@ -113,24 +114,29 @@ class UserMenu(StatesGroup):
 @dp.message(Command('start'))
 async def user_start(message: types.Message, state: FSMContext):
     await db.create_db()
-    await message.answer('Здравствуйте, введите свой номер телефона')
+    kb = [
+            [types.KeyboardButton(text="Предоставить номер телефона", request_contact=True)],
+
+        ]
+    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
+    nomer = await message.answer('Здравствуйте, предоставьте свой номер телефона', reply_markup=keyboard)
     await state.set_state(UserState.centr)
 
 
 @dp.message(StateFilter(UserState.centr))
 async def user_start(message: types.Message, state: FSMContext):
-    global user_info
+    global user_info, all_user_data, global_phone_number
 
     user_info = []
-    phone = str(message.text)
+    global_phone_number = str(message.contact.phone_number)
     data_users = await db.get_phone_status()
     flag1 = 'newUser'
     for i in range(len(data_users)):
-        if phone == str(data_users[i][0]):
+        if global_phone_number == str(data_users[i][0]):
             flag1 = str(data_users[i][1])
     if flag1 == 'newUser':
         user_info.append(int(message.chat.id))
-        user_info.append(phone)
+        user_info.append(global_phone_number)
         await db.create_profile(user_info[0], user_info[1], 'newUser')
         user_info.append('ageUser')
         await message.answer('Введите свое имя')
@@ -142,7 +148,8 @@ async def user_start(message: types.Message, state: FSMContext):
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer('Привет **имя пользователя**', reply_markup=keyboard) # заменить на нормальное
+        all_user_data = db.get_user(global_phone_number)
+        await message.answer('Приветствую, {first_name}'.format(first_name=all_user_data[2]), reply_markup=keyboard)
     elif flag1 == 'admin':
         await state.set_state(UserState.admin)
 
@@ -221,6 +228,8 @@ async def reg(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserReg.photoProfile))
 async def reg(message: types.Message, state: FSMContext):
+    global all_user_data
+
     file_id = message.photo[-1].file_id
     user_info.append(file_id)
     user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile = user_info
@@ -231,7 +240,9 @@ async def reg(message: types.Message, state: FSMContext):
 
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    await message.answer('Привет имя пользователя', reply_markup=keyboard)
+    all_user_data = db.get_user(phone)
+    await message.answer('Регистрация завершена')
+    await message.answer('Приветствую, {first_name1}'.format(first_name1=all_user_data[2]), reply_markup=keyboard)
     await state.set_state(UserState.ageUser)
 
 
@@ -243,7 +254,8 @@ async def menu(message: types.Message, state: FSMContext):
         [types.KeyboardButton(text="Хочу заказать верх (Платье, блузка, жакет, рубашка)")],
         [types.KeyboardButton(text="Хочу заказать низ Юбка")],
         [types.KeyboardButton(text="Хочу заказать низ Брюки")],
-        [types.KeyboardButton(text="Связаться с менеджером")]
+        [types.KeyboardButton(text="Связаться с менеджером")],
+        [types.KeyboardButton(text="Зарегистрироваться заново")]
 
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
@@ -253,13 +265,15 @@ async def menu(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserMenu.menu))
 async def menedq(message: types.Message, state: FSMContext):
-    flag1 = 'ageUser'  # проверка в базе данных!!!
+    have_user_merki = 'no'
     if str(message.text).lower() == 'связаться с менеджером':
         await message.answer('Введите текст проблемы, и с вами свяжется менеджер',
                              reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserMenu.meneg)
     elif str(message.text).lower() == 'хочу заказать низ юбка':
-        if flag1 == 'newUser':
+        if all_user_data[-3]:
+            have_user_merki = 'yes'
+        if have_user_merki == 'no':
             kb = [
                 [types.KeyboardButton(text="Сделаем мерки")],
                 [types.KeyboardButton(text="Стандартный размер")],
@@ -267,7 +281,7 @@ async def menedq(message: types.Message, state: FSMContext):
             ]
             keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
             await message.answer("Давайте снимим с вас мерки", reply_markup=keyboard)
-        elif flag1 == 'ageUser':
+        elif have_user_merki == 'yes':
             kb = [
                 [types.KeyboardButton(text="Использовать старые мерки")],
                 [types.KeyboardButton(text="Сделаем мерки")],
@@ -277,7 +291,9 @@ async def menedq(message: types.Message, state: FSMContext):
             await message.answer("Выберите действие", reply_markup=keyboard)
         await state.set_state(UserMenu.underSkirt)
     elif str(message.text).lower() == 'хочу заказать низ брюки':
-        if flag1 == 'newUser':
+        if all_user_data[-2]:
+            have_user_merki = 'yes'
+        if have_user_merki == 'no':
             kb = [
                 [types.KeyboardButton(text="Сделаем мерки")],
                 [types.KeyboardButton(text="Стандартный размер")],
@@ -285,7 +301,7 @@ async def menedq(message: types.Message, state: FSMContext):
             ]
             keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
             await message.answer("Давайте снимим с вас мерки", reply_markup=keyboard)
-        elif flag1 == 'ageUser':
+        elif have_user_merki == 'yes':
             kb = [
                 [types.KeyboardButton(text="Использовать старые мерки")],
                 [types.KeyboardButton(text="Сделаем мерки")],
@@ -295,7 +311,9 @@ async def menedq(message: types.Message, state: FSMContext):
             await message.answer("Выберите действие", reply_markup=keyboard)
         await state.set_state(UserMenu.underTrousers)
     elif str(message.text).lower() == 'хочу заказать верх (платье, блузка, жакет, рубашка)':
-        if flag1 == 'newUser':
+        if all_user_data[-1]:
+            have_user_merki = 'yes'
+        if have_user_merki == 'no':
             kb = [
                 [types.KeyboardButton(text="Сделаем мерки")],
                 [types.KeyboardButton(text="Стандартный размер")],
@@ -303,7 +321,7 @@ async def menedq(message: types.Message, state: FSMContext):
             ]
             keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
             await message.answer("Давайте снимим с вас мерки", reply_markup=keyboard)
-        elif flag1 == 'ageUser':
+        elif have_user_merki == 'yes':
             kb = [
                 [types.KeyboardButton(text="Использовать старые мерки")],
                 [types.KeyboardButton(text="Сделаем мерки")],
@@ -312,12 +330,27 @@ async def menedq(message: types.Message, state: FSMContext):
             keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
             await message.answer("Выберите действие", reply_markup=keyboard)
         await state.set_state(UserMenu.top)
+    elif str(message.text).lower() == 'зарегистрироваться заново':
+        db.delete_user(global_phone_number)
+        kb = [
+            [types.KeyboardButton(text="Предоставить номер телефона", request_contact=True)],
+
+        ]
+        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
+        nomer = await message.answer('Здравствуйте, предоставьте свой номер телефона', reply_markup=keyboard)
+        await state.set_state(UserState.centr)
+
 
 
 # --------------------------------------------- меню -------------------------------------------
 # --------------------------------------------- менеджер ---------------------------------------
 @dp.message(StateFilter(UserMenu.meneg))
 async def problem(message: types.Message, state: FSMContext):
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
     kb = [
         [types.KeyboardButton(text="В меню")],
 
@@ -331,6 +364,8 @@ async def problem(message: types.Message, state: FSMContext):
 # --------------------------------------------- низ юбка --------------------------------------------
 @dp.message(StateFilter(UserMenu.underSkirt))
 async def under(message: types.Message, state: FSMContext):
+    global merki_skirt
+
     print(str(message.text))
     if str(message.text).lower() == 'использовать старые мерки':
         print('максим')  # подгружаем базу данных
@@ -340,6 +375,7 @@ async def under(message: types.Message, state: FSMContext):
         await message.answer('Загрузите одно-два фото желаемого изделия')
         await state.set_state(UserMenu.orderSkirt)
     elif str(message.text).lower() == 'сделаем мерки':
+        merki_skirt = ''
         kb = [
             [types.KeyboardButton(text="Начать")],
             [types.KeyboardButton(text="Меню")],
@@ -367,24 +403,58 @@ async def under(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserSize.step1))
 async def under(message: types.Message, state: FSMContext):
+    global merki_skirt
+
+    merki_skirt += str(message.text)
+    merki_skirt += '/'
     await message.answer_photo(photo_9, 'Обхват бедер')
     await state.set_state(UserSize.step2)
 
 
 @dp.message(StateFilter(UserSize.step2))
 async def under(message: types.Message, state: FSMContext):
+    global merki_skirt
+
+    merki_skirt += str(message.text)
+    merki_skirt += '/'
     await message.answer_photo(photo_1, 'Высота бедер')
     await state.set_state(UserSize.step3)
 
 
 @dp.message(StateFilter(UserSize.step3))
 async def under(message: types.Message, state: FSMContext):
+    global merki_skirt
+
+    merki_skirt += str(message.text)
+    merki_skirt += '/'
     await message.answer_photo(photo_7, 'Длина изделия')
+    await state.set_state(UserSize.step3_5)
+
+@dp.message(StateFilter(UserSize.step3_5))
+async def under(message: types.Message, state: FSMContext):
+    global merki_skirt
+
+    merki_skirt += str(message.text)
+    await message.answer('Загрузите одно-два фото желаемого изделия')
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
     await state.set_state(UserSize.step4)
 
 
 @dp.message(StateFilter(UserSize.step4))
 async def under(message: types.Message, state: FSMContext):
+    global merki_skirt, all_user_data
+
+    db.input_merki(merki_skirt, 'skirt', global_phone_number)
+    all_user_data = db.get_user(global_phone_number)
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
     kb = [
         [types.KeyboardButton(text="В меню")],
     ]
@@ -395,6 +465,16 @@ async def under(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserMenu.orderSkirt))
 async def under(message: types.Message, state: FSMContext):
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
     kb = [
         [types.KeyboardButton(text="В меню")],
     ]
@@ -408,13 +488,15 @@ async def under(message: types.Message, state: FSMContext):
 @dp.message(StateFilter(UserMenu.underTrousers))
 async def under(message: types.Message, state: FSMContext):
     if str(message.text).lower() == 'использовать старые мерки':
-        print('максим')  # подгружаем базу данных
+        global merki_pants
+
         await message.answer('Загрузите одно-два фото желаемого изделия')
         await state.set_state(UserMenu.orderTrousers)
     elif str(message.text).lower() == 'стандартный размер':
         await message.answer('Загрузите одно-два фото желаемого изделия')
         await state.set_state(UserMenu.orderTrousers)
     elif str(message.text).lower() == 'сделаем мерки':
+        merki_pants = ''
         kb = [
             [types.KeyboardButton(text="Начать")],
             [types.KeyboardButton(text="Меню")],
@@ -442,37 +524,69 @@ async def under(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserSize.step23))
 async def under(message: types.Message, state: FSMContext):
+    global merki_pants
+
+    merki_pants += str(message.text)
+    merki_pants += '/'
     await message.answer_photo(photo_9, 'Обхват бедер')
     await state.set_state(UserSize.step24)
 
 
 @dp.message(StateFilter(UserSize.step24))
 async def under(message: types.Message, state: FSMContext):
+    global merki_pants
+
+    merki_pants += str(message.text)
+    merki_pants += '/'
     await message.answer_photo(photo_1, 'Высота бедер')
     await state.set_state(UserSize.step25)
 
 
 @dp.message(StateFilter(UserSize.step25))
 async def under(message: types.Message, state: FSMContext):
+    global merki_pants
+
+    merki_pants += str(message.text)
+    merki_pants += '/'
     await message.answer_photo(photo_4, 'Высота сиденья')
     await state.set_state(UserSize.step26)
 
 
 @dp.message(StateFilter(UserSize.step26))
 async def under(message: types.Message, state: FSMContext):
+    global merki_pants
+
+    merki_pants += str(message.text)
+    merki_pants += '/'
     await message.answer_photo(photo_6, 'Длина брюк по боку')
     await state.set_state(UserSize.step27)
 
 
 @dp.message(StateFilter(UserSize.step27))
 async def under(message: types.Message, state: FSMContext):
+    global merki_pants
+
+    merki_pants += str(message.text)
     await message.answer('Загрузите одно-два фото желаемого изделия')
-    # получаем фото
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
     await state.set_state(UserSize.step28)
 
 
 @dp.message(StateFilter(UserSize.step28))
 async def under(message: types.Message, state: FSMContext):
+    global merki_pants, all_user_data
+
+    db.input_merki(merki_pants, 'pants', global_phone_number)
+    all_user_data = db.get_user(global_phone_number)
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
     kb = [
         [types.KeyboardButton(text="В меню")],
     ]
@@ -483,6 +597,16 @@ async def under(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserMenu.orderTrousers))
 async def under(message: types.Message, state: FSMContext):
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
     kb = [
         [types.KeyboardButton(text="В меню")],
     ]
@@ -495,15 +619,17 @@ async def under(message: types.Message, state: FSMContext):
 # --------------------------------------------- верх -------------------------------------------
 @dp.message(StateFilter(UserMenu.top))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
     print(str(message.text))
     if str(message.text).lower() == 'использовать старые мерки':
-        print('максим')  # подгружаем базу данных
         await message.answer('Загрузите одно-два фото желаемого изделия')
         await state.set_state(UserMenu.orderTop)
     elif str(message.text).lower() == 'стандартный размер':
         await message.answer('Загрузите одно-два фото желаемого изделия')
         await state.set_state(UserMenu.orderTop)
     elif str(message.text).lower() == 'сделаем мерки':
+        merki_up = ''
         kb = [
             [types.KeyboardButton(text="Начать")],
             [types.KeyboardButton(text="Меню")],
@@ -531,48 +657,80 @@ async def under(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserSize.step5))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_10, 'Обхват груди 1')
     await state.set_state(UserSize.step6)
 
 
 @dp.message(StateFilter(UserSize.step6))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_12, 'Обхват груди 2')
     await state.set_state(UserSize.step7)
 
 
 @dp.message(StateFilter(UserSize.step7))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_13, 'Обхват груди 3')
     await state.set_state(UserSize.step8)
 
 
 @dp.message(StateFilter(UserSize.step8))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_18, 'Центр груди')
     await state.set_state(UserSize.step9)
 
 
 @dp.message(StateFilter(UserSize.step9))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_2, 'Высота груди')
     await state.set_state(UserSize.step10)
 
 
 @dp.message(StateFilter(UserSize.step10))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_19, 'Ширина плеча')
     await state.set_state(UserSize.step11)
 
 
 @dp.message(StateFilter(UserSize.step11))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_15, 'Обхват плеча')
     await state.set_state(UserSize.step12)
 
 
 @dp.message(StateFilter(UserSize.step12))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_14, 'Обхват запястья')
     await state.set_state(UserSize.step13)
 
@@ -580,61 +738,110 @@ async def under(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserSize.step13))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_20, 'Длина рукава')
     await state.set_state(UserSize.step14)
 
 
 @dp.message(StateFilter(UserSize.step14))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_16, 'Обхват талии')
     await state.set_state(UserSize.step15)
 
 
 @dp.message(StateFilter(UserSize.step15))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_9, 'Обхват бедер')
     await state.set_state(UserSize.step16)
 
 
 @dp.message(StateFilter(UserSize.step16))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_1, 'Высота бедер')
     await state.set_state(UserSize.step17)
 
 
 @dp.message(StateFilter(UserSize.step17))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_11, 'Ширина спины')
     await state.set_state(UserSize.step18)
 
 
 @dp.message(StateFilter(UserSize.step18))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_8, 'Длина спины до талии')
     await state.set_state(UserSize.step19)
 
 
 @dp.message(StateFilter(UserSize.step19))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_8, 'Длина переда до талии')
     await state.set_state(UserSize.step20)
 
 
 @dp.message(StateFilter(UserSize.step20))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
+    merki_up += '/'
     await message.answer_photo(photo_8, 'Длина изделия')
     await state.set_state(UserSize.step21)
 
 
 @dp.message(StateFilter(UserSize.step21))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up
+
+    merki_up += str(message.text)
     await message.answer('Загрузите одно-два фото желаемого изделия')
-    # получаем фото
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
     await state.set_state(UserSize.step22)
 
 
 @dp.message(StateFilter(UserSize.step22))
 async def under(message: types.Message, state: FSMContext):
+    global merki_up, all_user_data
+
+    merki_up += str(message.text)
+    db.input_merki(merki_up, 'up', global_phone_number)
+    all_user_data = db.get_user(global_phone_number)
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
     kb = [
         [types.KeyboardButton(text="В меню")],
     ]
@@ -645,6 +852,16 @@ async def under(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(UserMenu.orderTop))
 async def under(message: types.Message, state: FSMContext):
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    # Получаем фото !!!!!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
+    #Переадресация админу !!!!!!!!!!!!!
     kb = [
         [types.KeyboardButton(text="В меню")],
     ]
