@@ -53,3 +53,15 @@ def delete_user(phone_number):
     cur = conn.cursor()
     cur.execute("DELETE FROM users WHERE phone_number == '{key}'".format(key=phone_number))
     conn.commit()
+
+def check_admin(phone_number):
+    conn = sqlite3.connect('users_data.sql')
+    cur = conn.cursor()
+    result = cur.execute("SELECT status FROM users WHERE phone_number == '{key}'".format(key=phone_number)).fetchone()
+    return result
+
+def get_admin_data():
+    conn = sqlite3.connect('users_data.sql')
+    cur = conn.cursor()
+    result = cur.execute("SELECT user_id FROM users WHERE status == 'admin'").fetchone()
+    return result
