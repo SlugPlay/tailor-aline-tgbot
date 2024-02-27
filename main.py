@@ -236,6 +236,14 @@ async def user_start(message: types.Message, state: FSMContext):
         await message.answer('Добрый день, {first_name}'.format(first_name=all_user_data[2]), reply_markup=keyboard)
     elif flag1 == 'admin':
         all_user_data = db.get_user(global_phone_number)
+        kb = [
+            [types.KeyboardButton(text="Получить список всех пользователей")],
+            [types.KeyboardButton(text="Вывести все заявки")],
+            [types.KeyboardButton(text="В меню")]
+
+        ]
+        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=keyboard)
         await state.set_state(UserState.admin)
 
 
@@ -429,21 +437,25 @@ async def reg(message: types.Message, state: FSMContext):
 # --------------------------------------------- админ ------------------------------------
 @dp.message(StateFilter(UserState.admin))
 async def menu(message: types.Message, state: FSMContext):
-    kb = [
-        [types.KeyboardButton(text="Получить список всех пользователей")],
-        [types.KeyboardButton(text="Вывести все заявки")],
-        [types.KeyboardButton(text="В меню")]
+    if str(message.text).lower() == 'в меню':
+        kb = [
+            [types.KeyboardButton(text="Хочу заказать верх (Платье, блузка, жакет, рубашка)")],
+            [types.KeyboardButton(text="Хочу заказать низ Юбка")],
+            [types.KeyboardButton(text="Хочу заказать низ Брюки")],
+            [types.KeyboardButton(text="Связаться с менеджером")],
+            [types.KeyboardButton(text="Зарегистрироваться заново")],
+            [types.KeyboardButton(text="Вернуться в панель админа")]
 
-    ]
-    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=keyboard)
-    await state.set_state(UserAdmin.menu)
+        ]
+        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        await message.answer("Что вы хотите заказать?", reply_markup=keyboard)
+        await state.set_state(UserMenu.menu)
 
 
 @dp.message(StateFilter(UserAdmin.menu))
 async def menu(message: types.Message, state: FSMContext):
-    if str(message.text).lower() == 'в меню':
-        await state.set_state(UserState.ageUser)
+    pass
+    
 
 # --------------------------------------------- админ ------------------------------------
 # --------------------------------------------- меню -------------------------------------------
@@ -536,6 +548,16 @@ async def menedq(message: types.Message, state: FSMContext):
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
         await message.answer('Вы точно хотите пройти процесс регистрации заново?', reply_markup=keyboard)
         await state.set_state(UserMenu.registration_again)
+    elif str(message.text).lower() == 'вернуться в панель админа' and global_phone_number in admin_users:
+        kb = [
+            [types.KeyboardButton(text="Получить список всех пользователей")],
+            [types.KeyboardButton(text="Вывести все заявки")],
+            [types.KeyboardButton(text="В меню")]
+
+        ]
+        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=keyboard)
+        await state.set_state(UserState.admin)
 
 
 @dp.message(StateFilter(UserMenu.registration_again))
