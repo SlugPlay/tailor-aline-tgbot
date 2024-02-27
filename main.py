@@ -219,7 +219,6 @@ async def reg(message: types.Message, state: FSMContext):
         await message.answer('🥺Не похоже на фамилию. Попробуйте еще раз')
         await state.set_state(UserReg.lastName)
 
-
 @dp.message(StateFilter(UserReg.age))
 async def regRegio(message: types.Message, state: FSMContext):
     if check(str(message.text), 'num'):
