@@ -1,12 +1,14 @@
 from aiogram import types, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from tailor_aline_tgbot.adminUser import admin_users
-from tailor_aline_tgbot.stateMachine import *
-from tailor_aline_tgbot.globall import *
-from tailor_aline_tgbot import db
+from adminUser import admin_users
+from stateMachine import *
+from handllers.menuStart import number_request
+import db
+
 
 router = Router()
+
 
 
 @router.message(StateFilter(UserState.ageUser))
@@ -26,14 +28,11 @@ async def menu2(message: types.Message, state: FSMContext):
 
 @router.message(StateFilter(UserMenu.menu))
 async def menedq(message: types.Message, state: FSMContext):
-    # что?
-    # что?
-    # что?
-    # что?
+    global global_phone_number, all_user_data
+
+    global_phone_number = number_request()
+    all_user_data = db.get_user(global_phone_number)
     have_user_merki = 'no'
-    # что?
-    # что?
-    # что?
     if str(message.text).lower() == 'связаться с менеджером':
         kb = [
             [types.KeyboardButton(text="Назад")]

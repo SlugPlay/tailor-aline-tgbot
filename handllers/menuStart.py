@@ -1,12 +1,18 @@
 from aiogram import types, Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from tailor_aline_tgbot import db
-from tailor_aline_tgbot.stateMachine import *
-from tailor_aline_tgbot.adminUser import acsess_files, admin_users
-from tailor_aline_tgbot.func import check
+import db
+from stateMachine import *
+from adminUser import acsess_files, admin_users
+from func import check
 
 router = Router()
+global_phone_number = ''
+
+def number_request():
+    global global_phone_number
+
+    return global_phone_number
 
 
 @router.message(Command('start'))
@@ -29,13 +35,16 @@ async def user_start1(message: types.Message, state: FSMContext):
     global_phone_number = str(message.contact.phone_number)
     if global_phone_number in admin_users:
         status_user = db.check_admin(global_phone_number)
-        if status_user[0] == 'ageUser':
-            vr_all_user_data = db.get_user(global_phone_number)
-            await db.edit_profile(user_id=vr_all_user_data[0], phone=global_phone_number, status='admin',
-                                  first_name=vr_all_user_data[2], last_name=vr_all_user_data[3],
-                                  age=vr_all_user_data[4], region=vr_all_user_data[5], size=vr_all_user_data[6],
-                                  photo_front=vr_all_user_data[7], photo_back=vr_all_user_data[8],
-                                  photo_profile=vr_all_user_data[9])
+        try:
+            if status_user[0] == 'ageUser':
+                vr_all_user_data = db.get_user(global_phone_number)
+                await db.edit_profile(user_id=vr_all_user_data[0], phone=global_phone_number, status='admin',
+                                    first_name=vr_all_user_data[2], last_name=vr_all_user_data[3],
+                                    age=vr_all_user_data[4], region=vr_all_user_data[5], size=vr_all_user_data[6],
+                                    photo_front=vr_all_user_data[7], photo_back=vr_all_user_data[8],
+                                    photo_profile=vr_all_user_data[9])
+        except:
+            pass
     data_users = await db.get_phone_status()
     flag1 = 'newUser'
     for i in range(len(data_users)):
@@ -60,7 +69,6 @@ async def user_start1(message: types.Message, state: FSMContext):
         all_user_data = db.get_user(global_phone_number)
         kb = [
             [types.KeyboardButton(text="Получить список всех пользователей")],
-            [types.KeyboardButton(text="Вывести все заявки")],
             [types.KeyboardButton(text="В меню")]
 
         ]

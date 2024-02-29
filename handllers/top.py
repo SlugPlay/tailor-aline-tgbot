@@ -2,12 +2,12 @@ from aiogram import types, Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ContentType, Message
-from tailor_aline_tgbot.stateMachine import *
-from tailor_aline_tgbot.adminUser import acsess_files
-from tailor_aline_tgbot.func import check
-from tailor_aline_tgbot.globall import *
-from tailor_aline_tgbot import db
-from tailor_aline_tgbot.photos import photo_1, photo_2, photo_8, photo_9, \
+from stateMachine import *
+from adminUser import acsess_files
+from func import check, request_buy
+from handllers.menuStart import number_request
+import db
+from photos import photo_1, photo_2, photo_8, photo_9, \
     photo_10, photo_11, \
     photo_12, photo_13, photo_14, photo_15, photo_17, photo_18, photo_19, photo_20, photo_16
 
@@ -16,7 +16,10 @@ router = Router()
 
 @router.message(StateFilter(UserMenu.top))
 async def under17(message: types.Message, state: FSMContext):
-    global merki_up
+    global merki_up, global_phone_number, all_user_data
+
+    global_phone_number = number_request()
+    all_user_data = db.get_user(global_phone_number)
     if str(message.text).lower() == 'использовать старые мерки':
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserMenu.orderTop)
@@ -71,8 +74,7 @@ async def under19(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Обхват шеи: ' + str(message.text) + '\n'
         await message.answer_photo(photo_10, 'Обхват груди 1')
         await state.set_state(UserSize.step6)
     else:
@@ -85,8 +87,7 @@ async def under20(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Обхват груди 1: ' + str(message.text) + '\n'
         await message.answer_photo(photo_12, 'Обхват груди 2')
         await state.set_state(UserSize.step7)
     else:
@@ -99,8 +100,7 @@ async def under21(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Обхват груди 2: ' + str(message.text) + '\n'
         await message.answer_photo(photo_13, 'Обхват груди 3')
         await state.set_state(UserSize.step8)
     else:
@@ -113,8 +113,7 @@ async def under22(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Обхват груди 3: ' + str(message.text) + '\n'
         await message.answer_photo(photo_18, 'Центр груди')
         await state.set_state(UserSize.step9)
     else:
@@ -127,8 +126,7 @@ async def under23(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Центр груди: ' + str(message.text) + '\n'
         await message.answer_photo(photo_2, 'Высота груди')
         await state.set_state(UserSize.step10)
     else:
@@ -141,8 +139,7 @@ async def under24(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Высота груди: ' + str(message.text) + '\n'
         await message.answer_photo(photo_19, 'Ширина плеча')
         await state.set_state(UserSize.step11)
     else:
@@ -155,8 +152,7 @@ async def under25(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Ширина плеча: ' + str(message.text) + '\n'
         await message.answer_photo(photo_15, 'Обхват плеча')
         await state.set_state(UserSize.step12)
     else:
@@ -169,8 +165,7 @@ async def under26(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Обхват плеча: ' + str(message.text) + '\n'
         await message.answer_photo(photo_14, 'Обхват запястья')
         await state.set_state(UserSize.step13)
     else:
@@ -183,8 +178,7 @@ async def under27(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Обхват запястья: ' + str(message.text) + '\n'
         await message.answer_photo(photo_20, 'Длина рукава')
         await state.set_state(UserSize.step14)
     else:
@@ -197,8 +191,7 @@ async def under28(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Длина рукава: ' + str(message.text) + '\n'
         await message.answer_photo(photo_16, 'Обхват талии')
         await state.set_state(UserSize.step15)
     else:
@@ -211,8 +204,7 @@ async def under29(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Обхват талии: ' + str(message.text) + '\n'
         await message.answer_photo(photo_9, 'Обхват бедер')
         await state.set_state(UserSize.step16)
     else:
@@ -225,8 +217,7 @@ async def under30(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Обхват бедер: ' + str(message.text) + '\n'
         await message.answer_photo(photo_1, 'Высота бедер')
         await state.set_state(UserSize.step17)
     else:
@@ -239,8 +230,7 @@ async def under31(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Высота бедер: ' + str(message.text) + '\n'
         await message.answer_photo(photo_11, 'Ширина спины')
         await state.set_state(UserSize.step18)
     else:
@@ -253,8 +243,7 @@ async def under32(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Ширина спины: ' + str(message.text) + '\n'
         await message.answer_photo(photo_8, 'Длина спины до талии')
         await state.set_state(UserSize.step19)
     else:
@@ -267,8 +256,7 @@ async def under33(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Длина спины до талии: ' + str(message.text) + '\n'
         await message.answer_photo(photo_8, 'Длина переда до талии')
         await state.set_state(UserSize.step20)
     else:
@@ -281,8 +269,7 @@ async def under34(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
-        merki_up += '/'
+        merki_up = 'Длина переда до талии: ' + str(message.text) + '\n'
         await message.answer_photo(photo_8, 'Длина изделия')
         await state.set_state(UserSize.step21)
     else:
@@ -295,7 +282,7 @@ async def under35(message: types.Message, state: FSMContext):
     global merki_up
 
     if check(str(message.text), 'num'):
-        merki_up += str(message.text)
+        merki_up = 'Длина изделия: ' + str(message.text)
         await message.answer('Загрузите одно-два фото желаемого изделия')
         await state.set_state(UserSize.step22)
     else:
@@ -329,11 +316,7 @@ async def under36(message: types.Message, state: FSMContext, album: list[Message
         merki_up += str(message.text)
         db.input_merki(merki_up, 'up', global_phone_number)
         all_user_data = db.get_user(global_phone_number)
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
+        await request_buy('Верх', all_user_data, db.get_admin_data(), merki_up, 'individual', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],
         ]
@@ -363,11 +346,7 @@ async def under37(message: types.Message, state: FSMContext, album: list[Message
         await state.set_state(UserMenu.orderTop)
     else:
         await message.answer('Фото получены')
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
+        await request_buy('Верх', all_user_data, db.get_admin_data(), all_user_data[6], 'standart', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],
         ]

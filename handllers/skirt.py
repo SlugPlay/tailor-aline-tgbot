@@ -2,19 +2,24 @@ from aiogram import types, Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ContentType, Message
-from tailor_aline_tgbot.stateMachine import *
-from tailor_aline_tgbot.adminUser import acsess_files
-from tailor_aline_tgbot.func import check
-from tailor_aline_tgbot.globall import *
-from tailor_aline_tgbot import db
-from tailor_aline_tgbot.photos import photo_1, photo_7, photo_9, photo_16
+from stateMachine import *
+from adminUser import acsess_files
+from func import check, request_buy
+from photos import photo_1, photo_7, photo_9, photo_16
+from handllers.menuStart import number_request
+import db
+from aiogram.types import FSInputFile
+
 
 router = Router()
 
 
 @router.message(StateFilter(UserMenu.underSkirt))
 async def under(message: types.Message, state: FSMContext):
-    global merki_skirt
+    global merki_skirt, global_phone_number, all_user_data
+
+    global_phone_number = number_request()
+    all_user_data = db.get_user(global_phone_number)
     if str(message.text).lower() == 'использовать старые мерки':
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserMenu.orderSkirt)
@@ -70,8 +75,7 @@ async def under2(message: types.Message, state: FSMContext):
     global merki_skirt
 
     if check(str(message.text), 'num'):
-        merki_skirt += str(message.text)
-        merki_skirt += '/'
+        merki_skirt = 'Обхват талии: ' + str(message.text) + '\n'
         await message.answer_photo(photo_9, 'Обхват бедер')
         await state.set_state(UserSize.step2)
     else:
@@ -84,8 +88,7 @@ async def under3(message: types.Message, state: FSMContext):
     global merki_skirt
 
     if check(str(message.text), 'num'):
-        merki_skirt += str(message.text)
-        merki_skirt += '/'
+        merki_skirt = 'Обхват бедер: ' + str(message.text) + '\n'
         await message.answer_photo(photo_1, 'Высота бедер')
         await state.set_state(UserSize.step3)
     else:
@@ -98,8 +101,7 @@ async def under4(message: types.Message, state: FSMContext):
     global merki_skirt
 
     if check(str(message.text), 'num'):
-        merki_skirt += str(message.text)
-        merki_skirt += '/'
+        merki_skirt = 'Высота бедер: ' + str(message.text) + '\n'
         await message.answer_photo(photo_7, 'Длина изделия')
         await state.set_state(UserSize.step3_5)
     else:
@@ -112,7 +114,7 @@ async def under5(message: types.Message, state: FSMContext):
     global merki_skirt
 
     if check(str(message.text), 'num'):
-        merki_skirt += str(message.text)
+        merki_skirt = 'Длина изделия: ' + str(message.text)
         await message.answer('Загрузите одно-два фото желаемого изделия')
         await state.set_state(UserSize.step4)
     else:
@@ -145,11 +147,7 @@ async def under6(message: types.Message, state: FSMContext, album: list[Message]
         await message.answer('Фото получены')
         db.input_merki(merki_skirt, 'skirt', global_phone_number)
         all_user_data = db.get_user(global_phone_number)
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
+        await request_buy('Низ - Юбка', all_user_data, db.get_admin_data(), merki_skirt, 'individual', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],
         ]
@@ -180,11 +178,7 @@ async def under7(message: types.Message, state: FSMContext, album: list[Message]
         await state.set_state(UserMenu.orderSkirt)
     else:
         await message.answer('Фото получены')
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
+        await request_buy('Низ - Юбка', all_user_data, db.get_admin_data(), all_user_data[6], 'standart', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],
         ]

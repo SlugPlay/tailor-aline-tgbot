@@ -1,4 +1,5 @@
 import asyncio
+import sys
 
 from typing import Callable, Any, Awaitable, Union
 from aiogram import Bot, Dispatcher, types, fsm, filters, F, BaseMiddleware
@@ -6,6 +7,7 @@ from aiogram import Bot, Dispatcher, types, fsm, filters, F, BaseMiddleware
 from aiogram.types import FSInputFile, Message, InputMediaPhoto, InputMedia, ContentType
 from typing import Any, Dict, Union
 
+from config import bot
 
 class SomeMiddleware(BaseMiddleware):
     album_data: dict = {}

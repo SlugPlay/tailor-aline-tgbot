@@ -2,18 +2,22 @@ from aiogram import types, Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ContentType, Message
-from tailor_aline_tgbot.stateMachine import *
-from tailor_aline_tgbot.adminUser import acsess_files
-from tailor_aline_tgbot.func import check
-from tailor_aline_tgbot.globall import *
-from tailor_aline_tgbot import db
-from tailor_aline_tgbot.photos import photo_1, photo_4, photo_6, photo_9, photo_16
+from stateMachine import *
+from adminUser import acsess_files
+from func import check, request_buy
+from handllers.menuStart import number_request
+import db
+from photos import photo_1, photo_4, photo_6, photo_9, photo_16
 
 router = Router()
 
 
 @router.message(StateFilter(UserMenu.underTrousers))
 async def under8(message: types.Message, state: FSMContext):
+    global global_phone_number, all_user_data
+
+    global_phone_number = number_request()
+    all_user_data = db.get_user(global_phone_number)
     if str(message.text).lower() == 'использовать старые мерки':
         global merki_pants
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
@@ -69,8 +73,7 @@ async def under10(message: types.Message, state: FSMContext):
     global merki_pants
 
     if check(str(message.text), 'num'):
-        merki_pants += str(message.text)
-        merki_pants += '/'
+        merki_pants = 'Обхват талии: ' + str(message.text) + '\n'
         await message.answer_photo(photo_9, 'Обхват бедер')
         await state.set_state(UserSize.step24)
     else:
@@ -83,8 +86,7 @@ async def under11(message: types.Message, state: FSMContext):
     global merki_pants
 
     if check(str(message.text), 'num'):
-        merki_pants += str(message.text)
-        merki_pants += '/'
+        merki_pants = 'Обхват бедер: ' + str(message.text) + '\n'
         await message.answer_photo(photo_1, 'Высота бедер')
         await state.set_state(UserSize.step25)
     else:
@@ -97,8 +99,7 @@ async def under12(message: types.Message, state: FSMContext):
     global merki_pants
 
     if check(str(message.text), 'num'):
-        merki_pants += str(message.text)
-        merki_pants += '/'
+        merki_pants = 'Высота бедер: ' + str(message.text) + '\n'
         await message.answer_photo(photo_4, 'Высота сиденья')
         await state.set_state(UserSize.step26)
     else:
@@ -111,8 +112,7 @@ async def under13(message: types.Message, state: FSMContext):
     global merki_pants
 
     if check(str(message.text), 'num'):
-        merki_pants += str(message.text)
-        merki_pants += '/'
+        merki_pants = 'Высота сиденья: ' + str(message.text) + '\n'
         await message.answer_photo(photo_6, 'Длина брюк по боку')
         await state.set_state(UserSize.step27)
     else:
@@ -125,7 +125,7 @@ async def under14(message: types.Message, state: FSMContext):
     global merki_pants
 
     if check(str(message.text), 'num'):
-        merki_pants += str(message.text)
+        merki_pants = 'Длина брюк по боку: ' + str(message.text)
         await message.answer('Загрузите одно-два фото желаемого изделия')
         await state.set_state(UserSize.step28)
     else:
@@ -158,11 +158,7 @@ async def under15(message: types.Message, state: FSMContext, album: list[Message
         await message.answer('Фото получены')
         db.input_merki(merki_pants, 'pants', global_phone_number)
         all_user_data = db.get_user(global_phone_number)
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
+        await request_buy('Низ - Брюки', all_user_data, db.get_admin_data(), merki_pants, 'individual', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],
         ]
@@ -192,11 +188,7 @@ async def under16(message: types.Message, state: FSMContext, album: list[Message
         await state.set_state(UserMenu.orderTrousers)
     else:
         await message.answer('Фото получены')
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
-        # Переадресация админу !!!!!!!!!!!!!
+        await request_buy('Низ - Брюки', all_user_data, db.get_admin_data(), all_user_data[6], 'standart', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],
         ]
