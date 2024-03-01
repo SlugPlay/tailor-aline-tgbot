@@ -1,5 +1,6 @@
 import sqlite3
-
+import pandas
+import os
 
 async def create_db():
     global conn, cur
@@ -65,3 +66,13 @@ def get_admin_data():
     cur = conn.cursor()
     result = cur.execute("SELECT user_id FROM users WHERE status == 'admin'").fetchone()
     return result
+
+def get_all_data():
+    if os.path.exists('exported_data.xlsx'):
+        os.remove('exported_data.xlsx')
+    conn = sqlite3.connect('users_data.sql')
+    writer = pandas.ExcelWriter('exported_data.xlsx')
+    data_frame = pandas.read_sql("SELECT * FROM users", conn)
+    data_frame.to_excel(writer, index=False)
+    writer.close()
+
