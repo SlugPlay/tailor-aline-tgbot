@@ -5,14 +5,15 @@ from aiogram import Dispatcher
 from midleware import SomeMiddleware
 
 # ---------------------------------------
-import menuStart
-import mainMenu
-import admin
-import menedger
-import skirt
-import trousers
-import top
+from handllers import menuStart
+from handllers import mainMenu
+from handllers import admin
+from handllers import menedger
+from handllers import skirt
+from handllers import trousers
+from handllers import top
 from config import *
+
 
 # ---------------------------------------
 

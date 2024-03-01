@@ -21,7 +21,9 @@ class SomeMiddleware(BaseMiddleware):
             message: Message,
             data: dict[str, Any]
     ) -> Any:
-        if not message.media_group_id:
+        if message.photo:
+            pass
+        elif not message.media_group_id:
             await handler(message, data)
             return
         try:

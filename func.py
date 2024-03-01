@@ -1,5 +1,6 @@
 import re
 from config import bot
+from adminUser import admin_chat
 
 
 def check(text, type):
@@ -12,7 +13,7 @@ def check(text, type):
 
 
 async def request_buy(name_order, all_user_data, admin_data, merki, type, files):
-    for i in admin_data:
+    for i in admin_chat:
         await bot.send_message(i,
                                "Новый заказ!\nПользователь номер: {}\nНомер телефона: {}\nИмя: {}\nФамилия: {}\nВозраст: {}\nРегион: {}\nРазмер: {}\n".format(
                                    all_user_data[0], all_user_data[1], all_user_data[2], all_user_data[3],

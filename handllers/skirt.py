@@ -2,12 +2,13 @@ from aiogram import types, Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ContentType, Message
-from tailor_aline_tgbot.stateMachine import *
-from tailor_aline_tgbot.adminUser import acsess_files
-from tailor_aline_tgbot.func import check, request_buy
-from tailor_aline_tgbot.photos import *
-from menuStart import number_request
-from tailor_aline_tgbot import db
+from stateMachine import *
+from adminUser import acsess_files
+from func import check, request_buy
+from photos import *
+from handllers.menuStart import number_request
+import db
+
 from aiogram.types import FSInputFile
 from buttone.menuKB import menu_kb
 import json
@@ -145,6 +146,7 @@ async def under6(message: types.Message, state: FSMContext, album: list[Message]
 @router.message(StateFilter(UserMenu.orderSkirt),
                 F.content_type.in_(
                     [ContentType.PHOTO, ContentType.VIDEO, ContentType.AUDIO, ContentType.DOCUMENT, ContentType.TEXT]))
+
 async def under7(message: types.Message, state: FSMContext, album: list[Message]):
     flag_unknown_media = False
     media_group = []
@@ -170,5 +172,5 @@ async def under7(message: types.Message, state: FSMContext, album: list[Message]
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await message.answer('Благодарим Вас! С вами свяжется наш менеджер в течении 1 часа.',
-                             reply_markup=keyboard)
+                            reply_markup=keyboard)
         await state.set_state(UserState.ageUser)

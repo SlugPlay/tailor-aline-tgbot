@@ -1,10 +1,11 @@
 from aiogram import types, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from tailor_aline_tgbot.config import bot
-from tailor_aline_tgbot.stateMachine import *
-from menuStart import number_request
-from tailor_aline_tgbot import db
+from config import bot
+from stateMachine import *
+from handllers.mainMenu import number_request
+from adminUser import admin_chat
+import db
 from buttone.menuKB import menu_kb
 import json
 
@@ -23,7 +24,7 @@ async def problem(message: types.Message, state: FSMContext):
         await state.set_state(UserMenu.menu)
     else:
         admin_data = db.get_admin_data()
-        for i in admin_data:
+        for i in admin_chat:
             await bot.send_message(i,
                                    "Новое обращение с вопросом!\nПользователь номер: {}\nНомер телефона: {}\nИмя: {}\nФамилия: {}\nВозраст: {}\nРегион: {}\nРазмер: {}\n".format(
                                        all_user_data[0], all_user_data[1], all_user_data[2], all_user_data[3],

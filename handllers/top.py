@@ -2,15 +2,15 @@ from aiogram import types, Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ContentType, Message
-from tailor_aline_tgbot.stateMachine import *
-from tailor_aline_tgbot.adminUser import acsess_files
-from tailor_aline_tgbot.func import check, request_buy
-from menuStart import number_request
-from tailor_aline_tgbot import db
+from stateMachine import *
+from adminUser import acsess_files
+from func import check, request_buy
+from handllers.menuStart import number_request
+import db
 from aiogram.types import FSInputFile
 from buttone.menuKB import menu_kb
 import json
-from tailor_aline_tgbot.photos import *
+from photos import *
 
 router = Router()
 
