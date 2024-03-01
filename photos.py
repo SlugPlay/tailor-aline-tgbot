@@ -1,4 +1,5 @@
 from aiogram.types import FSInputFile
+import os
 
 photo_1 = FSInputFile("photo_bot/Высота бедер.jpg")
 photo_2 = FSInputFile("photo_bot/Высота груди.jpg")

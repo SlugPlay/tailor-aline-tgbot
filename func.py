@@ -1,6 +1,7 @@
 import re
 from config import bot
 
+
 def check(text, type):
     if type == 'lang':
         regex = "^[a-zA-Zа-яА-ЯёЁ]+$"
@@ -8,14 +9,14 @@ def check(text, type):
         return pattern.search(text) is not None
     if type == 'num':
         return text.isdigit()
-    
+
 
 async def request_buy(name_order, all_user_data, admin_data, merki, type, files):
     for i in admin_data:
         await bot.send_message(i,
-                                "Новый заказ!\nПользователь номер: {}\nНомер телефона: {}\nИмя: {}\nФамилия: {}\nВозраст: {}\nРегион: {}\nРазмер: {}\n".format(
-                                    all_user_data[0], all_user_data[1], all_user_data[2], all_user_data[3],
-                                    all_user_data[4], all_user_data[5], all_user_data[6]))
+                               "Новый заказ!\nПользователь номер: {}\nНомер телефона: {}\nИмя: {}\nФамилия: {}\nВозраст: {}\nРегион: {}\nРазмер: {}\n".format(
+                                   all_user_data[0], all_user_data[1], all_user_data[2], all_user_data[3],
+                                   all_user_data[4], all_user_data[5], all_user_data[6]))
         try:
             if all_user_data[7][-3:] == 'pic':
                 await bot.send_photo(i, all_user_data[7][:-4], caption='Фото спереди:')

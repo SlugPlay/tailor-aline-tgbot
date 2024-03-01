@@ -54,6 +54,7 @@ class UserReg(StatesGroup):
     photoProfile = State()
     problem = State()
     problem1 = State()
+    order = State()
 
 
 class UserAdmin(StatesGroup):
