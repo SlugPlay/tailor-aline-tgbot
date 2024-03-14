@@ -1,10 +1,10 @@
 from aiogram import types, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from tailor_aline_tgbot.adminUser import admin_users
-from tailor_aline_tgbot.stateMachine import *
+from adminUser import admin_users
+from stateMachine import *
 from menuStart import number_request
-from tailor_aline_tgbot import db
+import db
 from buttone.clothes import clothes_kb
 from buttone.order_new import order_new
 from buttone.order_old import order_old

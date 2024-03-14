@@ -22,7 +22,7 @@ async def user_start(message: types.Message, state: FSMContext):
         [types.KeyboardButton(text="Предоставить номер телефона", request_contact=True)],
 
     ]
-    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
+    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, one_time_keyboard=True)
     nomer = await message.answer('Просим предоставить номер телефона', reply_markup=keyboard)
     await state.set_state(UserState.centr)
 
@@ -31,45 +31,67 @@ async def user_start(message: types.Message, state: FSMContext):
 async def user_start1(message: types.Message, state: FSMContext):
     global user_info, all_user_data, global_phone_number
 
-    user_info = []
-    global_phone_number = str(message.contact.phone_number)
-    if global_phone_number in admin_users:
-        status_user = db.check_admin(global_phone_number)
-        try:
-            if status_user[0] == 'ageUser':
-                vr_all_user_data = db.get_user(global_phone_number)
-                await db.edit_profile(user_id=vr_all_user_data[0], phone=global_phone_number, status='admin',
-                                      first_name=vr_all_user_data[2], last_name=vr_all_user_data[3],
-                                      age=vr_all_user_data[4], region=vr_all_user_data[5], size=vr_all_user_data[6],
-                                      photo_front=vr_all_user_data[7], photo_back=vr_all_user_data[8],
-                                      photo_profile=vr_all_user_data[9])
-        except:
-            pass
-    data_users = await db.get_phone_status()
-    flag1 = 'newUser'
-    for i in range(len(data_users)):
-        if global_phone_number == str(data_users[i][0]):
-            flag1 = str(data_users[i][1])
-    if flag1 == 'newUser':
-        user_info.append(int(message.chat.id))
-        user_info.append(global_phone_number)
-        await db.create_profile(user_info[0], user_info[1], 'newUser')
-        user_info.append('ageUser')
-        await message.answer('Напишите ваше имя')
-        await state.set_state(UserState.newUser)
-    elif flag1 == 'ageUser':
-        await state.set_state(UserState.ageUser)
+    if message.text:
         kb = [
-            [types.KeyboardButton(text="В меню")]
-        ]
-        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        all_user_data = db.get_user(global_phone_number)
-        await message.answer('Добрый день, {first_name}'.format(first_name=all_user_data[2]), reply_markup=keyboard)
-    elif flag1 == 'admin':
-        all_user_data = db.get_user(global_phone_number)
+            [types.KeyboardButton(text="Предоставить номер телефона", request_contact=True)],
 
-        await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=admin_kb)
-        await state.set_state(UserState.admin)
+        ]
+        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, one_time_keyboard=True)
+        nomer = await message.answer('Просим предоставить номер телефона.\nНажмите на кнопку ниже', reply_markup=keyboard)
+        await state.set_state(UserState.centr)
+    else:
+        user_info = []
+        global_phone_number = str(message.contact.phone_number)
+        if global_phone_number[0] != '+':
+            global_phone_number = '+' + global_phone_number
+        if global_phone_number in admin_users:
+            status_user = db.check_admin(global_phone_number)
+            try:
+                if status_user[0] == 'ageUser':
+                    vr_all_user_data = db.get_user(global_phone_number)
+                    await db.edit_profile(user_id=vr_all_user_data[0], phone=global_phone_number, status='admin',
+                                        first_name=vr_all_user_data[2], last_name=vr_all_user_data[3],
+                                        age=vr_all_user_data[4], region=vr_all_user_data[5], size=vr_all_user_data[6],
+                                        photo_front=vr_all_user_data[7], photo_back=vr_all_user_data[8],
+                                        photo_profile=vr_all_user_data[9])
+            except:
+                pass
+        data_users = await db.get_phone_status()
+        flag1 = 'newUser'
+        for i in range(len(data_users)):
+            if global_phone_number == str(data_users[i][0]):
+                flag1 = str(data_users[i][1])
+        if flag1 == 'newUser':
+            user_info.append(int(message.chat.id))
+            user_info.append(global_phone_number)
+            await message.answer(str(user_info[0]))
+            await message.answer(str(user_info[1]))
+            await db.create_profile(user_info[0], user_info[1], 'newUser')
+            user_info.append('ageUser')
+            await message.answer('Напишите ваше имя')
+            await state.set_state(UserState.newUser)
+        elif flag1 == 'ageUser':
+            await state.set_state(UserState.ageUser)
+            kb = [
+                [types.KeyboardButton(text="В меню")]
+            ]
+            keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+            all_user_data = db.get_user(global_phone_number)
+            await message.answer('Добрый день, {first_name}'.format(first_name=all_user_data[2]), reply_markup=keyboard)
+        elif flag1 == 'admin':
+            all_user_data = db.get_user(global_phone_number)
+
+            await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=admin_kb)
+            await state.set_state(UserState.admin)
+        elif flag1 == 'black':
+            await message.answer('Вас внесли в чёрный список за нарушение пункта ???')
+            await state.set_state(UserState.ban_safe)
+
+
+@router.message(StateFilter(UserState.ban_safe))
+async def ban_safe(message: types.Message, state: FSMContext):
+    await message.answer('Вас внесли в чёрный список за нарушение пункта ???')
+    await state.set_state(UserState.ban_safe)
 
 
 @router.message(StateFilter(UserState.newUser))

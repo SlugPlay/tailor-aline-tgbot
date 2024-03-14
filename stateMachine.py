@@ -6,6 +6,8 @@ class UserState(StatesGroup):
     newUser = State()
     ageUser = State()
     admin = State()
+    ban_safe = State()
+    
 
 
 class UserSize(StatesGroup):
@@ -61,6 +63,8 @@ class UserReg(StatesGroup):
 
 class UserAdmin(StatesGroup):
     menu = State()
+    ban = State()
+    checkUser = State()
 
 
 class UserMenu(StatesGroup):

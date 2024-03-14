@@ -93,3 +93,10 @@ def get_all_data():
     data_frame = pandas.read_sql("SELECT * FROM users", conn)
     data_frame.to_excel(writer, index=False)
     writer.close()
+
+
+def ban_user(phone):
+    conn = sqlite3.connect('users_data.sql')
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET status = '{}' WHERE phone_number  == '{}'".format('black', phone))
+    conn.commit()

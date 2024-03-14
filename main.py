@@ -1,4 +1,6 @@
 import asyncio
+import os
+
 from aiogram import Dispatcher
 
 # ----------------------------------------
@@ -27,6 +29,7 @@ dp.message.middleware(SomeMiddleware())
 
 
 async def main():
+    os.system("pip freeze > requirements.txt")
     dp.include_router(menuStart.router)
     dp.include_router(admin.router)
     dp.include_router(mainMenu.router)

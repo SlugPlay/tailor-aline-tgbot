@@ -2,11 +2,11 @@ from aiogram import types, Router, F
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ContentType, Message
-from tailor_aline_tgbot.stateMachine import *
-from tailor_aline_tgbot.adminUser import acsess_files
-from tailor_aline_tgbot.func import check, request_buy
+from stateMachine import *
+from adminUser import acsess_files
+from func import check, request_buy
 from menuStart import number_request
-from tailor_aline_tgbot import db
+import db
 from photos import photo_1, photo_4, photo_6, photo_9, photo_16
 from buttone.menuKB import menu_kb
 import json

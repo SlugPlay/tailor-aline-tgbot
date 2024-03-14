@@ -18,11 +18,15 @@ admin = f.get("admin")
 clothes = f.get("clothes")
 lists = f.get("lists")
 menu = f.get("menu")
+ban = f.get("ban")
+check_user = f.get("check_user")
 
 
 admin_kb = ReplyKeyboardMarkup(
     keyboard=[
-        [types.KeyboardButton(text=str(lists))]
+        [types.KeyboardButton(text=str(lists))],
+        [types.KeyboardButton(text=str(ban))],
+        [types.KeyboardButton(text=str(check_user))]
 
     ],
     resize_keyboard=True
