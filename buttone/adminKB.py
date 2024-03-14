@@ -15,14 +15,14 @@ throusres = f.get("throusres")
 menedger = f.get("menedger")
 perereg = f.get("perereg")
 admin = f.get("admin")
+clothes = f.get("clothes")
+lists = f.get("lists")
+menu = f.get("menu")
+
+
 admin_kb = ReplyKeyboardMarkup(
     keyboard=[
-        [types.KeyboardButton(text=str(top))],
-        [types.KeyboardButton(text=str(skirt))],
-        [types.KeyboardButton(text=str(throusres))],
-        [types.KeyboardButton(text=str(menedger))],
-        [types.KeyboardButton(text=str(perereg))],
-        [types.KeyboardButton(text=str(admin))]
+        [types.KeyboardButton(text=str(lists))]
 
     ],
     resize_keyboard=True

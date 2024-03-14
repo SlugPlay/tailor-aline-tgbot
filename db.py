@@ -80,7 +80,8 @@ def check_admin(phone_number):
 def get_admin_data():
     conn = sqlite3.connect('users_data.sql')
     cur = conn.cursor()
-    result = cur.execute("SELECT user_id FROM users WHERE status == 'admin'").fetchone()
+    #result = cur.execute("SELECT user_id FROM users WHERE status == 'admin'").fetchone()
+    result = [-4165631542]
     return result
 
 

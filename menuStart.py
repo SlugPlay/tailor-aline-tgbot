@@ -5,7 +5,7 @@ import db
 from stateMachine import *
 from adminUser import acsess_files, admin_users
 from func import check
-
+from buttone.adminKB import admin_kb
 router = Router()
 global_phone_number = ''
 
@@ -67,13 +67,8 @@ async def user_start1(message: types.Message, state: FSMContext):
         await message.answer('Добрый день, {first_name}'.format(first_name=all_user_data[2]), reply_markup=keyboard)
     elif flag1 == 'admin':
         all_user_data = db.get_user(global_phone_number)
-        kb = [
-            [types.KeyboardButton(text="Получить список всех пользователей")],
-            [types.KeyboardButton(text="В меню")]
 
-        ]
-        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=keyboard)
+        await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=admin_kb)
         await state.set_state(UserState.admin)
 
 
@@ -123,14 +118,12 @@ async def reg2(message: types.Message, state: FSMContext):
     else:
         user_info.append(str(message.text))
         kb = [
-            [types.KeyboardButton(text="40"), types.KeyboardButton(text="41"),
-             types.KeyboardButton(text="42"), types.KeyboardButton(text="43")],
-            [types.KeyboardButton(text="44"), types.KeyboardButton(text="45"),
-             types.KeyboardButton(text="46"), types.KeyboardButton(text="47")],
-            [types.KeyboardButton(text="48"), types.KeyboardButton(text="49"),
-             types.KeyboardButton(text="50"), types.KeyboardButton(text="51")],
-            [types.KeyboardButton(text="52"), types.KeyboardButton(text="53"),
-             types.KeyboardButton(text="54"), types.KeyboardButton(text="55"), types.KeyboardButton(text="55")]
+            [types.KeyboardButton(text="40"), types.KeyboardButton(text="42"),
+             types.KeyboardButton(text="44"), types.KeyboardButton(text="46")],
+            [types.KeyboardButton(text="48"), types.KeyboardButton(text="50"),
+             types.KeyboardButton(text="52"), types.KeyboardButton(text="54")]
+
+
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
