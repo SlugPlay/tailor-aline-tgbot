@@ -6,6 +6,7 @@ from tailor_aline_tgbot.stateMachine import *
 from menuStart import number_request
 from tailor_aline_tgbot import db
 from buttone.menuKB import menu_kb
+from  buttone.clothes import clothes_kb
 from buttone.order_new import order_new
 from buttone.order_old import order_old
 import json
@@ -38,35 +39,38 @@ async def menedq(message: types.Message, state: FSMContext):
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await message.answer("Напишите свою проблему, или нажмите кнопку 'Назад'", reply_markup=keyboard)
         await state.set_state(UserReg.problem)
-    elif str(message.text) == f.get('skirt'):
-        if all_user_data[-3]:
-            have_user_merki = 'yes'
-        if have_user_merki == 'no':
-            await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
-        elif have_user_merki == 'yes':
-
-            await message.answer("Выберите действие", reply_markup=order_old)
-        await state.set_state(UserMenu.underSkirt)
-    elif str(message.text) == f.get('throusres'):
-        if all_user_data[-2]:
-            have_user_merki = 'yes'
-        if have_user_merki == 'no':
-
-            await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
-        elif have_user_merki == 'yes':
-
-            await message.answer("Выберите действие", reply_markup=order_old)
-        await state.set_state(UserMenu.underTrousers)
-    elif str(message.text) == f.get('top'):
-        if all_user_data[-1]:
-            have_user_merki = 'yes'
-        if have_user_merki == 'no':
-
-            await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
-        elif have_user_merki == 'yes':
-
-            await message.answer("Выберите действие", reply_markup=order_old)
-        await state.set_state(UserMenu.top)
+    # elif str(message.text) == f.get('skirt'):
+    #     if all_user_data[-3]:
+    #         have_user_merki = 'yes'
+    #     if have_user_merki == 'no':
+    #         await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
+    #     elif have_user_merki == 'yes':
+    #
+    #         await message.answer("Выберите действие", reply_markup=order_old)
+    #     await state.set_state(UserMenu.underSkirt)
+    # elif str(message.text) == f.get('throusres'):
+    #     if all_user_data[-2]:
+    #         have_user_merki = 'yes'
+    #     if have_user_merki == 'no':
+    #
+    #         await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
+    #     elif have_user_merki == 'yes':
+    #
+    #         await message.answer("Выберите действие", reply_markup=order_old)
+    #     await state.set_state(UserMenu.underTrousers)
+    # elif str(message.text) == f.get('top'):
+    #     if all_user_data[-1]:
+    #         have_user_merki = 'yes'
+    #     if have_user_merki == 'no':
+    #
+    #         await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
+    #     elif have_user_merki == 'yes':
+    #
+    #         await message.answer("Выберите действие", reply_markup=order_old)
+    #     await state.set_state(UserMenu.top)
+    elif str(message.text) == f.get('clothes'):
+        await message.answer(str(f.get('order')), reply_markup=clothes_kb)
+        await state.set_state(UserSize.step31)
     elif str(message.text) == f.get('perereg'):
         kb = [
             [types.KeyboardButton(text="Да")],

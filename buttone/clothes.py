@@ -14,12 +14,14 @@ skirt = f.get("skirt")
 throusres = f.get("throusres")
 menedger = f.get("menedger")
 perereg = f.get("perereg")
-clothes = f.get("clothes")
-menu_kb = ReplyKeyboardMarkup(
+back = f.get("back")
+
+clothes_kb = ReplyKeyboardMarkup(
     keyboard=[
-        [types.KeyboardButton(text=str(clothes))],
-        [types.KeyboardButton(text=str(menedger))],
-        [types.KeyboardButton(text=str(perereg))]
+        [types.KeyboardButton(text=str(top))],
+        [types.KeyboardButton(text=str(skirt))],
+        [types.KeyboardButton(text=str(throusres))],
+        [types.KeyboardButton(text=str(back))],
 
     ],
     resize_keyboard=True

@@ -40,6 +40,8 @@ class UserSize(StatesGroup):
     step28 = State()
     step29 = State()
     step30 = State()
+    step31 = State()
+    step32 = State()
 
 
 class UserReg(StatesGroup):

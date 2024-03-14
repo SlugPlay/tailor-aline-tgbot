@@ -13,6 +13,7 @@ import skirt
 import trousers
 import top
 from config import *
+import clothesMenu
 
 # ---------------------------------------
 
@@ -29,6 +30,7 @@ async def main():
     dp.include_router(menuStart.router)
     dp.include_router(admin.router)
     dp.include_router(mainMenu.router)
+    dp.include_router(clothesMenu.router)
     dp.include_router(menedger.router)
     dp.include_router(skirt.router)
     dp.include_router(trousers.router)
