@@ -23,34 +23,33 @@ async def under8(message: types.Message, state: FSMContext):
     all_user_data = db.get_user(global_phone_number)
     if str(message.text) == f.get('oldSize'):
         global merki_pants
-        await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(f.get("product"), reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserMenu.orderTrousers)
     elif str(message.text) == f.get('standartSize'):
-        await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(f.get("product"), reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserMenu.orderTrousers)
     elif str(message.text) == f.get('makeSize'):
         merki_pants = ''
         kb = [
-            [types.KeyboardButton(text="Начать")],
-            [types.KeyboardButton(text="Меню")],
+            [types.KeyboardButton(text=f.get("start"))],
+            [types.KeyboardButton(text=f.get("menu"))],
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await message.answer(
-            "Пожалуйста, измерьте фигуру самостоятельно или при помощи другого человека, следуя инструкции.",
+            f.get("please"),
             reply_markup=keyboard)
         await state.set_state(UserMenu.orderUnderTrousers)
-    elif str(message.text).lower() == 'назад':
+    elif str(message.text) == f.get("back"):
         await message.answer(f.get('order'), reply_markup=menu_kb)
         await state.set_state(UserMenu.menu)
 
 
 @router.message(StateFilter(UserMenu.orderUnderTrousers))
 async def under9(message: types.Message, state: FSMContext):
-    if str(message.text).lower() == 'меню':
+    if str(message.text) == f.get("menu"):
         await message.answer(f.get('order'), reply_markup=menu_kb)
         await state.set_state(UserMenu.menu)
     else:
-        print('work')
         await message.answer_photo(photo_16, 'Обхват талии', reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserSize.step23)
 
@@ -139,19 +138,19 @@ async def under15(message: types.Message, state: FSMContext, album: list[Message
             flag_unknown_media = True
     if flag_unknown_media:
         await message.answer(
-            '🥺Не похоже на нужный формат. Загрузи фотографию в обычном формате теллеграмма или в виде файла с расширением jpg/jpeg/png')
+            f.get("fileCheck"))
         media_group = []
         await state.set_state(UserSize.step28)
     else:
-        await message.answer('Фото получены')
+        await message.answer(f.get("photoComplete"))
         db.input_merki(merki_pants, 'pants', global_phone_number)
         all_user_data = db.get_user(global_phone_number)
         await request_buy('Низ - Брюки', all_user_data, db.get_admin_data(), merki_pants, 'individual', media_group)
         kb = [
-            [types.KeyboardButton(text="В меню")],
+            [types.KeyboardButton(text=f.get("menu"))],
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer('Благодарим Вас! С вами свяжется наш менеджер в течении 1 часа.', reply_markup=keyboard)
+        await message.answer(f.get("connect"), reply_markup=keyboard)
         await state.set_state(UserState.ageUser)
 
 
@@ -176,12 +175,12 @@ async def under16(message: types.Message, state: FSMContext, album: list[Message
         media_group = []
         await state.set_state(UserMenu.orderTrousers)
     else:
-        await message.answer('Фото получены')
+        await message.answer(f.get("photoComplete"))
         await request_buy('Низ - Брюки', all_user_data, db.get_admin_data(), all_user_data[6], 'standart', media_group)
         kb = [
-            [types.KeyboardButton(text="В меню")],
+            [types.KeyboardButton(text=f.get("menu"))],
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer('Благодарим Вас! С вами свяжется наш менеджер в течении 1 часа.',
+        await message.answer(f.get("connect"),
                              reply_markup=keyboard)
         await state.set_state(UserState.ageUser)

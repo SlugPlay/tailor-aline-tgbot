@@ -29,30 +29,30 @@ async def menu2(message: types.Message, state: FSMContext):
         if all_user_data[-3]:
             have_user_merki = 'yes'
         if have_user_merki == 'no':
-            await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
+            await message.answer(f.get("size"), reply_markup=order_new)
         elif have_user_merki == 'yes':
 
-            await message.answer("Выберите действие", reply_markup=order_old)
+            await message.answer(f.get('action'), reply_markup=order_old)
         await state.set_state(UserMenu.underSkirt)
     elif str(message.text) == f.get('throusres'):
         if all_user_data[-2]:
             have_user_merki = 'yes'
         if have_user_merki == 'no':
 
-            await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
+            await message.answer(f.get("size"), reply_markup=order_new)
         elif have_user_merki == 'yes':
 
-            await message.answer("Выберите действие", reply_markup=order_old)
+            await message.answer(f.get("action"), reply_markup=order_old)
         await state.set_state(UserMenu.underTrousers)
     elif str(message.text) == f.get('top'):
         if all_user_data[-1]:
             have_user_merki = 'yes'
         if have_user_merki == 'no':
 
-            await message.answer("Давайте снимим с вас мерки", reply_markup=order_new)
+            await message.answer(f.get("size"), reply_markup=order_new)
         elif have_user_merki == 'yes':
 
-            await message.answer("Выберите действие", reply_markup=order_old)
+            await message.answer(f.get("action"), reply_markup=order_old)
         await state.set_state(UserMenu.top)
     elif str(message.text) == f.get('back'):
         await message.answer(str(f.get('order')), reply_markup=menu_kb)

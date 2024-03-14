@@ -5,13 +5,15 @@ from tailor_aline_tgbot.stateMachine import *
 from buttone.adminKB import admin_kb
 import db
 from aiogram.types import FSInputFile
-
+import json
+file = open("TXT.json", 'r', encoding='utf-8')
+f = json.load(file)
 router = Router()
 
 
 @router.message(StateFilter(UserState.admin))
 async def menu(message: types.Message, state: FSMContext):
-    if str(message.text).lower() == 'получить список всех пользователей':
+    if str(message.text) == f.get("lists"):
         db.get_all_data()
         data = FSInputFile('exported_data.xlsx')
         await message.answer_document(data)

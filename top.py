@@ -25,30 +25,30 @@ async def under17(message: types.Message, state: FSMContext):
     global_phone_number = number_request()
     all_user_data = db.get_user(global_phone_number)
     if str(message.text) == f.get('oldSize'):
-        await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(f.get("product"), reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserMenu.orderTop)
     elif str(message.text) == f.get('standartSize'):
-        await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(f.get("product"), reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserMenu.orderTop)
     elif str(message.text) == f.get('makeSize'):
         merki_up = ''
         kb = [
-            [types.KeyboardButton(text="Начать")],
-            [types.KeyboardButton(text="Меню")],
+            [types.KeyboardButton(text=f.get("start"))],
+            [types.KeyboardButton(text = f.get("menu"))],
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await message.answer(
-            "Пожалуйста, измерьте фигуру самостоятельно или при помощи другого человека, следуя инструкции.",
+            f.get("menu"),
             reply_markup=keyboard)
         await state.set_state(UserMenu.orderTopVse)
-    elif str(message.text).lower() == 'назад':
+    elif str(message.text) == f.get("back"):
         await message.answer(f.get('order'), reply_markup=menu_kb)
         await state.set_state(UserMenu.menu)
 
 
 @router.message(StateFilter(UserMenu.orderTopVse))
 async def under18(message: types.Message, state: FSMContext):
-    if str(message.text).lower() == 'меню':
+    if str(message.text) == f.get("menu"):
         await message.answer(f.get('order'), reply_markup=menu_kb)
         await state.set_state(UserMenu.menu)
     else:
@@ -299,7 +299,7 @@ async def under36(message: types.Message, state: FSMContext, album: list[Message
         media_group = []
         await state.set_state(UserSize.step22)
     else:
-        await message.answer('Фото получены')
+        await message.answer(f.get("photoComplete"))
         merki_up += str(message.text)
         db.input_merki(merki_up, 'up', global_phone_number)
         all_user_data = db.get_user(global_phone_number)
@@ -308,7 +308,7 @@ async def under36(message: types.Message, state: FSMContext, album: list[Message
             [types.KeyboardButton(text="В меню")],
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer('Благодарим Вас! С вами свяжется наш менеджер в течении 1 часа.', reply_markup=keyboard)
+        await message.answer(f.get("please"), reply_markup=keyboard)
         await state.set_state(UserState.ageUser)
 
 
@@ -332,12 +332,12 @@ async def under37(message: types.Message, state: FSMContext, album: list[Message
         media_group = []
         await state.set_state(UserMenu.orderTop)
     else:
-        await message.answer('Фото получены')
+        await message.answer(f.get("photoComplete"))
         await request_buy('Верх', all_user_data, db.get_admin_data(), all_user_data[6], 'standart', media_group)
         kb = [
-            [types.KeyboardButton(text="В меню")],
+            [types.KeyboardButton(text=f.get("menu"))],
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer('Благодарим Вас! С вами свяжется наш менеджер в течении 1 часа.',
+        await message.answer(f.get("please"),
                              reply_markup=keyboard)
         await state.set_state(UserState.ageUser)

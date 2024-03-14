@@ -38,7 +38,7 @@ async def menedq(message: types.Message, state: FSMContext):
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer("Напишите свою проблему, или нажмите кнопку 'Назад'", reply_markup=keyboard)
+        await message.answer(f.get('problem'), reply_markup=keyboard)
         await state.set_state(UserReg.problem)
     elif str(message.text) == f.get('clothes'):
         await message.answer(str(f.get('order')), reply_markup=clothes_kb)
@@ -49,7 +49,7 @@ async def menedq(message: types.Message, state: FSMContext):
             [types.KeyboardButton(text="Нет")]
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
-        await message.answer('Вы точно хотите пройти процесс регистрации заново?', reply_markup=keyboard)
+        await message.answer(f.get("perereg"), reply_markup=keyboard)
         await state.set_state(UserMenu.registration_again)
     # elif str(message.text).lower() == 'вернуться в панель админа' and global_phone_number in admin_users:
     #     await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=admin_kb)
@@ -61,13 +61,13 @@ async def perereg(message: types.Message, state: FSMContext):
     if str(message.text).lower() == 'да':
         db.delete_user(global_phone_number)
         kb = [
-            [types.KeyboardButton(text="Предоставить номер телефона", request_contact=True)],
+            [types.KeyboardButton(text=f.get("number"), request_contact=True)],
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
-        nomer = await message.answer('Здравствуйте, предоставьте свой номер телефона', reply_markup=keyboard)
+        nomer = await message.answer(f.get("getNumber"), reply_markup=keyboard)
         await state.set_state(UserState.centr)
     else:
-        await message.answer("Возвращаю вас в меню...")
+        await message.answer(f.get("repeatMenu"))
 
-        await message.answer("Что вы хотите заказать?", reply_markup=menu_kb)
+        await message.answer(f.get("order"), reply_markup=menu_kb)
         await state.set_state(UserMenu.menu)

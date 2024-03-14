@@ -6,9 +6,11 @@ from stateMachine import *
 from adminUser import acsess_files, admin_users
 from func import check
 from buttone.adminKB import admin_kb
+import json
 router = Router()
 global_phone_number = ''
-
+file = open("TXT.json", 'r', encoding='utf-8')
+f = json.load(file)
 
 def number_request():
     global global_phone_number
@@ -19,11 +21,11 @@ def number_request():
 async def user_start(message: types.Message, state: FSMContext):
     await db.create_db()
     kb = [
-        [types.KeyboardButton(text="Предоставить номер телефона", request_contact=True)],
+        [types.KeyboardButton(text=f.get("number"), request_contact=True)],
 
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
-    nomer = await message.answer('Просим предоставить номер телефона', reply_markup=keyboard)
+    nomer = await message.answer(f.get("getNumber"), reply_markup=keyboard)
     await state.set_state(UserState.centr)
 
 
@@ -55,12 +57,12 @@ async def user_start1(message: types.Message, state: FSMContext):
         user_info.append(global_phone_number)
         await db.create_profile(user_info[0], user_info[1], 'newUser')
         user_info.append('ageUser')
-        await message.answer('Напишите ваше имя')
+        await message.answer(f.get("name"))
         await state.set_state(UserState.newUser)
     elif flag1 == 'ageUser':
         await state.set_state(UserState.ageUser)
         kb = [
-            [types.KeyboardButton(text="В меню")]
+            [types.KeyboardButton(text=f.get("menu"))]
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         all_user_data = db.get_user(global_phone_number)
@@ -68,7 +70,7 @@ async def user_start1(message: types.Message, state: FSMContext):
     elif flag1 == 'admin':
         all_user_data = db.get_user(global_phone_number)
 
-        await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=admin_kb)
+        await message.answer(f.get("admin"), reply_markup=admin_kb)
         await state.set_state(UserState.admin)
 
 
@@ -76,10 +78,10 @@ async def user_start1(message: types.Message, state: FSMContext):
 async def reg(message: types.Message, state: FSMContext):
     if check(str(message.text), 'lang'):
         user_info.append(str(message.text))
-        await message.answer('Напишите вашу фамилию')
+        await message.answer(f.get("lastName"))
         await state.set_state(UserReg.lastName)
     else:
-        await message.answer('🥺Не похоже на имя. Попробуйте еще раз')
+        await message.answer(f.get("nameCheck"))
         await state.set_state(UserState.newUser)
 
 
@@ -87,10 +89,10 @@ async def reg(message: types.Message, state: FSMContext):
 async def reg1(message: types.Message, state: FSMContext):
     if check(str(message.text), 'lang'):
         user_info.append(str(message.text))
-        await message.answer('Напишите свой возраст')
+        await message.answer(f.get("age"))
         await state.set_state(UserReg.age)
     else:
-        await message.answer('🥺Не похоже на фамилию. Попробуйте еще раз')
+        await message.answer(f.get("lastNameCheck"))
         await state.set_state(UserReg.lastName)
 
 
@@ -103,17 +105,17 @@ async def regRegio(message: types.Message, state: FSMContext):
             [types.KeyboardButton(text="Другой")]
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer("Выберите свой регион", reply_markup=keyboard)
+        await message.answer(f.get("region"), reply_markup=keyboard)
         await state.set_state(UserReg.regionAnother)
     else:
-        await message.answer('🥺Не похоже на возраст. Попробуйте еще раз')
+        await message.answer(f.get("ageCheck"))
         await state.set_state(UserReg.age)
 
 
 @router.message(StateFilter(UserReg.regionAnother))
 async def reg2(message: types.Message, state: FSMContext):
     if str(message.text).lower() == 'другой':
-        await message.answer('Выберите свой регион', reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(f.get("region"), reply_markup=types.ReplyKeyboardRemove())
         await state.set_state(UserReg.regionAnother)
     else:
         user_info.append(str(message.text))
@@ -127,7 +129,7 @@ async def reg2(message: types.Message, state: FSMContext):
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer("Какой размер одежды вы носите?", reply_markup=keyboard)
+        await message.answer(f.get('yourSize'), reply_markup=keyboard)
         await state.set_state(UserReg.clothingSize)
 
 
@@ -135,10 +137,10 @@ async def reg2(message: types.Message, state: FSMContext):
 async def reg3(message: types.Message, state: FSMContext):
     user_info.append(str(message.text))
     kb = [
-        [types.KeyboardButton(text="Пропустить")]
+        [types.KeyboardButton(text=f.get("skip"))]
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-    await message.answer('Загрузите фото в полный рост спереди', reply_markup=keyboard)
+    await message.answer(f.get("front"), reply_markup=keyboard)
     await state.set_state(UserReg.photoFront)
 
 
@@ -147,29 +149,29 @@ async def reg4(message: types.Message, state: FSMContext):
     if message.photo:
         file_id = message.photo[-1].file_id
         user_info.append(str(file_id) + '/pic')
-        await message.answer('Загрузите фото в полный рост сзади')
+        await message.answer(f.get('behind'))
         await state.set_state(UserReg.photoBack)
     elif message.document:
         if str(message.document.mime_type) in acsess_files:
             file_id = message.document.file_id
             user_info.append(str(file_id) + '/doc')
-            await message.answer('Загрузите фото в полный рост сзади')
+            await message.answer(f.get('behind'))
             await state.set_state(UserReg.photoBack)
         else:
             await message.answer(
-                '🥺Не похоже на нужный формат. Загрузи фотографию в обычном формате теллеграмма или в виде файла с расширением jpg/jpeg/png')
+                f.get("fileCheck"))
             await state.set_state(UserReg.photoFront)
-    elif str(message.text).lower() == 'пропустить':
+    elif str(message.text) == f.get("skip"):
         user_info.append('')
         kb = [
-            [types.KeyboardButton(text="Пропустить")]
+            [types.KeyboardButton(text=f.get("skip"))]
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer('Загрузите фото в полный рост сзади', reply_markup=keyboard)
+        await message.answer(f.get('behind'), reply_markup=keyboard)
         await state.set_state(UserReg.photoBack)
     else:
         await message.answer(
-            '🥺Не похоже на нужный формат. Загрузи фотографию в обычном формате теллеграмма или в виде файла с расширением jpg/jpeg/png')
+            f.get("fileCheck"))
         await state.set_state(UserReg.photoFront)
 
 
@@ -178,29 +180,29 @@ async def reg5(message: types.Message, state: FSMContext):
     if message.photo:
         file_id = message.photo[-1].file_id
         user_info.append(str(file_id) + '/pic')
-        await message.answer('Загрузите фото в полный рост в профиль')
+        await message.answer(f.get("profile"))
         await state.set_state(UserReg.photoProfile)
     elif message.document:
         if str(message.document.mime_type) in acsess_files:
             file_id = message.document.file_id
             user_info.append(str(file_id) + '/doc')
-            await message.answer('Загрузите фото в полный рост в профиль')
+            await message.answer(f.get("profile"))
             await state.set_state(UserReg.photoProfile)
         else:
             await message.answer(
-                '🥺Не похоже на нужный формат. Загрузи фотографию в обычном формате теллеграмма или в виде файла с расширением jpg/jpeg/png')
+                f.get("fileCheck"))
             await state.set_state(UserReg.photoBack)
-    elif str(message.text).lower() == 'пропустить':
+    elif str(message.text) == f.get("skip"):
         user_info.append('')
         kb = [
-            [types.KeyboardButton(text="Пропустить")]
+            [types.KeyboardButton(text=f.get("skip"))]
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-        await message.answer('Загрузите фото в полный рост в профиль', reply_markup=keyboard)
+        await message.answer(f.get("profile"), reply_markup=keyboard)
         await state.set_state(UserReg.photoProfile)
     else:
         await message.answer(
-            '🥺Не похоже на нужный формат. Загрузи фотографию в обычном формате теллеграмма или в виде файла с расширением jpg/jpeg/png')
+            f.get("fileCheck"))
         await state.set_state(UserReg.photoBack)
 
 
@@ -215,12 +217,12 @@ async def reg6(message: types.Message, state: FSMContext):
         await db.edit_profile(user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back,
                               photo_profile)
         kb = [
-            [types.KeyboardButton(text="В меню")],
+            [types.KeyboardButton(text=f.get("menu"))],
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         all_user_data = db.get_user(phone)
-        await message.answer('Регистрация завершена')
+        await message.answer(f.get("finishReg"))
         await message.answer('Добрый день, {first_name1}'.format(first_name1=all_user_data[2]), reply_markup=keyboard)
         await state.set_state(UserState.ageUser)
     elif message.document:
@@ -232,33 +234,33 @@ async def reg6(message: types.Message, state: FSMContext):
                                   photo_back,
                                   photo_profile)
             kb = [
-                [types.KeyboardButton(text="В меню")],
+                [types.KeyboardButton(text=f.get("menu"))],
             ]
             keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
             all_user_data = db.get_user(phone)
-            await message.answer('Регистрация завершена')
+            await message.answer(f.get("finishReg"))
             await message.answer('Добрый день, {first_name1}'.format(first_name1=all_user_data[2]),
                                  reply_markup=keyboard)
             await state.set_state(UserState.ageUser)
         else:
             await message.answer(
-                '🥺Не похоже на нужный формат. Загрузи фотографию в обычном формате теллеграмма или в виде файла с расширением jpg/jpeg/png')
+                f.get("fileCheck"))
             await state.set_state(UserReg.photoProfile)
-    elif str(message.text).lower() == 'пропустить':
+    elif str(message.text) == f.get("skip"):
         user_info.append('')
         user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile = user_info
         await db.edit_profile(user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back,
                               photo_profile)
         kb = [
-            [types.KeyboardButton(text="В меню")],
+            [types.KeyboardButton(text=f.get("menu"))],
 
         ]
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         all_user_data = db.get_user(phone)
-        await message.answer('Регистрация завершена')
+        await message.answer(f.get("finishReg"))
         await message.answer('Добрый день, {first_name1}'.format(first_name1=all_user_data[2]), reply_markup=keyboard)
         await state.set_state(UserState.ageUser)
     else:
         await message.answer(
-            '🥺Не похоже на нужный формат. Загрузи фотографию в обычном формате теллеграмма или в виде файла с расширением jpg/jpeg/png')
+            f.get("fileCheck"))
         await state.set_state(UserReg.photoProfile)
