@@ -1,7 +1,7 @@
 from aiogram import types, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from .adminUser import admin_users
+from adminUser import admin_users
 from stateMachine import *
 from menuStart import number_request
 import db
