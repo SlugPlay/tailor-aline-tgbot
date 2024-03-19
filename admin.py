@@ -1,7 +1,7 @@
 from aiogram import types, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from tailor_aline_tgbot.stateMachine import *
+from stateMachine import *
 from buttone.adminKB import admin_kb
 import db
 from aiogram.types import FSInputFile
