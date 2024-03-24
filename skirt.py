@@ -108,11 +108,13 @@ async def under5(message: types.Message, state: FSMContext):
         await state.set_state(UserSize.step3_5)
 
 
+
+
 @router.message(StateFilter(UserSize.step4),
                 F.content_type.in_([ContentType.PHOTO, ContentType.VIDEO, ContentType.AUDIO, ContentType.DOCUMENT]))
 async def under6(message: types.Message, state: FSMContext, album: list[Message]):
     global merki_skirt, all_user_data
-
+    
     flag_unknown_media = False
     media_group = []
     for msg in album:
