@@ -6,6 +6,7 @@ from stateMachine import *
 from adminUser import acsess_files
 from func import check, request_buy
 from menuStart import number_request
+from config import rewrite_flag
 import db
 from photos import photo_1, photo_4, photo_6, photo_9, photo_16
 from buttone.menuKB import menu_kb
@@ -24,9 +25,11 @@ async def under8(message: types.Message, state: FSMContext):
     if str(message.text) == f.get('oldSize'):
         global merki_pants
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        rewrite_flag('True')
         await state.set_state(UserMenu.orderTrousers)
     elif str(message.text) == f.get('standartSize'):
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        rewrite_flag('True')
         await state.set_state(UserMenu.orderTrousers)
     elif str(message.text) == f.get('makeSize'):
         merki_pants = ''
@@ -115,6 +118,7 @@ async def under14(message: types.Message, state: FSMContext):
     if check(str(message.text), 'num'):
         merki_pants = 'Длина брюк по боку: ' + str(message.text)
         await message.answer('Загрузите одно-два фото желаемого изделия')
+        rewrite_flag('True')
         await state.set_state(UserSize.step28)
     else:
         await message.answer(f.get('parametrCheck'))
@@ -144,6 +148,7 @@ async def under15(message: types.Message, state: FSMContext, album: list[Message
         await state.set_state(UserSize.step28)
     else:
         await message.answer('Фото получены')
+        rewrite_flag('False')
         db.input_merki(merki_pants, 'pants', global_phone_number)
         all_user_data = db.get_user(global_phone_number)
         await request_buy('Низ - Брюки', all_user_data, db.get_admin_data(), merki_pants, 'individual', media_group)
@@ -177,6 +182,7 @@ async def under16(message: types.Message, state: FSMContext, album: list[Message
         await state.set_state(UserMenu.orderTrousers)
     else:
         await message.answer('Фото получены')
+        rewrite_flag('False')
         await request_buy('Низ - Брюки', all_user_data, db.get_admin_data(), all_user_data[6], 'standart', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],

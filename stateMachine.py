@@ -48,7 +48,7 @@ class UserSize(StatesGroup):
 
 class UserReg(StatesGroup):
     name = State()
-    lastName = State()
+    height = State()
     age = State()
     region = State()
     regionAnother = State()

@@ -51,9 +51,7 @@ async def menedq(message: types.Message, state: FSMContext):
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
         await message.answer('Вы точно хотите пройти процесс регистрации заново?', reply_markup=keyboard)
         await state.set_state(UserMenu.registration_again)
-    # elif str(message.text).lower() == 'вернуться в панель админа' and global_phone_number in admin_users:
-    #     await message.answer("Открываю панель управления...\nбип-буп-бип", reply_markup=admin_kb)
-    #     await state.set_state(UserState.admin)
+
 
 
 @router.message(StateFilter(UserMenu.registration_again))

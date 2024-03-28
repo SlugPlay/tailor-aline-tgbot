@@ -6,6 +6,7 @@ from stateMachine import *
 from adminUser import acsess_files
 from func import check, request_buy
 from menuStart import number_request
+from config import rewrite_flag
 import db
 from aiogram.types import FSInputFile
 from buttone.menuKB import menu_kb
@@ -26,9 +27,11 @@ async def under17(message: types.Message, state: FSMContext):
     all_user_data = db.get_user(global_phone_number)
     if str(message.text) == f.get('oldSize'):
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        rewrite_flag('True')
         await state.set_state(UserMenu.orderTop)
     elif str(message.text) == f.get('standartSize'):
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        rewrite_flag('True')
         await state.set_state(UserMenu.orderTop)
     elif str(message.text) == f.get('makeSize'):
         merki_up = ''
@@ -271,6 +274,7 @@ async def under35(message: types.Message, state: FSMContext):
     if check(str(message.text), 'num'):
         merki_up = 'Длина изделия: ' + str(message.text)
         await message.answer('Загрузите одно-два фото желаемого изделия')
+        rewrite_flag('True')
         await state.set_state(UserSize.step22)
     else:
         await message.answer(f.get('parametrCheck'))
@@ -300,6 +304,7 @@ async def under36(message: types.Message, state: FSMContext, album: list[Message
         await state.set_state(UserSize.step22)
     else:
         await message.answer('Фото получены')
+        rewrite_flag('False')
         merki_up += str(message.text)
         db.input_merki(merki_up, 'up', global_phone_number)
         all_user_data = db.get_user(global_phone_number)
@@ -333,6 +338,7 @@ async def under37(message: types.Message, state: FSMContext, album: list[Message
         await state.set_state(UserMenu.orderTop)
     else:
         await message.answer('Фото получены')
+        rewrite_flag('False')
         await request_buy('Верх', all_user_data, db.get_admin_data(), all_user_data[6], 'standart', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],

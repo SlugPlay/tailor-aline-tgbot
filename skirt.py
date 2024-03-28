@@ -1,21 +1,42 @@
 from aiogram import types, Router, F
-from aiogram.filters import StateFilter
+from aiogram.filters import StateFilter, Filter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ContentType, Message
+from aiogram.types import FSInputFile
+from aiogram.types.update import Update
+from aiogram.methods.get_updates import GetUpdates
+from config import bot
 from stateMachine import *
 from adminUser import acsess_files
 from func import check, request_buy
+from config import rewrite_flag
 from photos import *
 from menuStart import number_request
 import db
-from aiogram.types import FSInputFile
 from buttone.menuKB import menu_kb
 import json
+
+
+
 
 file = open("TXT.json", 'r', encoding='utf-8')
 f = json.load(file)
 
+
 router = Router()
+
+class my_filter(Filter):
+    def __init__(self, bruh) -> None:
+        pass
+
+    async def __call__(self, update: Update):
+        try:
+            if update.message.media_group_id:
+                return True
+            else:
+                await update.message.answer("Загрузите 2 и более фото")
+        except:
+                await update.message.answer("Загрузите 2 и более фото")
 
 
 @router.message(StateFilter(UserMenu.underSkirt))
@@ -26,9 +47,11 @@ async def under(message: types.Message, state: FSMContext):
     all_user_data = db.get_user(global_phone_number)
     if str(message.text) == f.get('oldSIze'):
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        rewrite_flag('True')
         await state.set_state(UserMenu.orderSkirt)
     elif str(message.text) == f.get('standartSize'):
         await message.answer('Загрузите одно-два фото желаемого изделия', reply_markup=types.ReplyKeyboardRemove())
+        rewrite_flag('True')
         await state.set_state(UserMenu.orderSkirt)
     elif str(message.text) == f.get('makeSize'):
         merki_skirt = ''
@@ -102,6 +125,7 @@ async def under5(message: types.Message, state: FSMContext):
     if check(str(message.text), 'num'):
         merki_skirt = 'Длина изделия: ' + str(message.text)
         await message.answer('Загрузите одно-два фото желаемого изделия')
+        rewrite_flag('True')
         await state.set_state(UserSize.step4)
     else:
         await message.answer(f.get('parametrCheck'))
@@ -133,6 +157,7 @@ async def under6(message: types.Message, state: FSMContext, album: list[Message]
         await state.set_state(UserSize.step4)
     else:
         await message.answer('Фото получены')
+        rewrite_flag('False')
         db.input_merki(merki_skirt, 'skirt', global_phone_number)
         all_user_data = db.get_user(global_phone_number)
         await request_buy('Низ - Юбка', all_user_data, db.get_admin_data(), merki_skirt, 'individual', media_group)
@@ -144,7 +169,7 @@ async def under6(message: types.Message, state: FSMContext, album: list[Message]
         await state.set_state(UserState.ageUser)
 
 
-@router.message(StateFilter(UserMenu.orderSkirt),
+@router.message(my_filter, StateFilter(UserMenu.orderSkirt),
                 F.content_type.in_(
                     [ContentType.PHOTO, ContentType.VIDEO, ContentType.AUDIO, ContentType.DOCUMENT, ContentType.TEXT]))
 async def under7(message: types.Message, state: FSMContext, album: list[Message]):
@@ -166,6 +191,7 @@ async def under7(message: types.Message, state: FSMContext, album: list[Message]
         await state.set_state(UserMenu.orderSkirt)
     else:
         await message.answer('Фото получены')
+        rewrite_flag('False')
         await request_buy('Низ - Юбка', all_user_data, db.get_admin_data(), all_user_data[6], 'standart', media_group)
         kb = [
             [types.KeyboardButton(text="В меню")],

@@ -50,7 +50,7 @@ async def user_start1(message: types.Message, state: FSMContext):
                 if status_user[0] == 'ageUser':
                     vr_all_user_data = db.get_user(global_phone_number)
                     await db.edit_profile(user_id=vr_all_user_data[0], phone=global_phone_number, status='admin',
-                                        first_name=vr_all_user_data[2], last_name=vr_all_user_data[3],
+                                        first_name=vr_all_user_data[2], height=vr_all_user_data[3],
                                         age=vr_all_user_data[4], region=vr_all_user_data[5], size=vr_all_user_data[6],
                                         photo_front=vr_all_user_data[7], photo_back=vr_all_user_data[8],
                                         photo_profile=vr_all_user_data[9])
@@ -64,8 +64,6 @@ async def user_start1(message: types.Message, state: FSMContext):
         if flag1 == 'newUser':
             user_info.append(int(message.chat.id))
             user_info.append(global_phone_number)
-            await message.answer(str(user_info[0]))
-            await message.answer(str(user_info[1]))
             await db.create_profile(user_info[0], user_info[1], 'newUser')
             user_info.append('ageUser')
             await message.answer('Напишите ваше имя')
@@ -98,22 +96,22 @@ async def ban_safe(message: types.Message, state: FSMContext):
 async def reg(message: types.Message, state: FSMContext):
     if check(str(message.text), 'lang'):
         user_info.append(str(message.text))
-        await message.answer('Напишите вашу фамилию')
-        await state.set_state(UserReg.lastName)
+        await message.answer('Напишите ваш рост')
+        await state.set_state(UserReg.height)
     else:
         await message.answer('🥺Не похоже на имя. Попробуйте еще раз')
         await state.set_state(UserState.newUser)
 
 
-@router.message(StateFilter(UserReg.lastName))
+@router.message(StateFilter(UserReg.height))
 async def reg1(message: types.Message, state: FSMContext):
-    if check(str(message.text), 'lang'):
+    if check(str(message.text), 'num'):
         user_info.append(str(message.text))
         await message.answer('Напишите свой возраст')
         await state.set_state(UserReg.age)
     else:
-        await message.answer('🥺Не похоже на фамилию. Попробуйте еще раз')
-        await state.set_state(UserReg.lastName)
+        await message.answer('🥺Не похоже на ваш рост. Попробуйте еще раз')
+        await state.set_state(UserReg.height)
 
 
 @router.message(StateFilter(UserReg.age))
@@ -233,8 +231,8 @@ async def reg6(message: types.Message, state: FSMContext):
     if message.photo:
         file_id = message.photo[-1].file_id
         user_info.append(str(file_id) + '/pic')
-        user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile = user_info
-        await db.edit_profile(user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back,
+        user_id, phone, status, first_name, height, age, region, size, photo_front, photo_back, photo_profile = user_info
+        await db.edit_profile(user_id, phone, status, first_name, height, age, region, size, photo_front, photo_back,
                               photo_profile)
         kb = [
             [types.KeyboardButton(text="В меню")],
@@ -249,8 +247,8 @@ async def reg6(message: types.Message, state: FSMContext):
         if str(message.document.mime_type) in acsess_files:
             file_id = message.document.file_id
             user_info.append(str(file_id) + '/doc')
-            user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile = user_info
-            await db.edit_profile(user_id, phone, status, first_name, last_name, age, region, size, photo_front,
+            user_id, phone, status, first_name, height, age, region, size, photo_front, photo_back, photo_profile = user_info
+            await db.edit_profile(user_id, phone, status, first_name, height, age, region, size, photo_front,
                                   photo_back,
                                   photo_profile)
             kb = [
@@ -268,8 +266,8 @@ async def reg6(message: types.Message, state: FSMContext):
             await state.set_state(UserReg.photoProfile)
     elif str(message.text).lower() == 'пропустить':
         user_info.append('')
-        user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back, photo_profile = user_info
-        await db.edit_profile(user_id, phone, status, first_name, last_name, age, region, size, photo_front, photo_back,
+        user_id, phone, status, first_name, height, age, region, size, photo_front, photo_back, photo_profile = user_info
+        await db.edit_profile(user_id, phone, status, first_name, height, age, region, size, photo_front, photo_back,
                               photo_profile)
         kb = [
             [types.KeyboardButton(text="В меню")],
